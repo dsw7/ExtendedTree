@@ -1,20 +1,64 @@
 #include "tree.hpp"
 
 #include <filesystem>
+#include <fmt/core.h>
 #include <iostream>
+#include <optional>
+#include <unistd.h>
 
 namespace fs = std::filesystem;
 
-void explore()
+struct Params {
+    std::optional<std::string> level = std::nullopt;
+    std::optional<fs::path> target = std::nullopt;
+};
+
+void parse_cli(int argc, char **argv, Params &params)
 {
-    fs::path target = fs::current_path();
-    run_tree(target);
+    int c = 0;
+
+    while ((c = getopt(argc, argv, "L:")) != -1) {
+        switch (c) {
+            case 'L':
+                params.level = optarg;
+                break;
+            default:
+                std::cerr << "Error parsing command line\n";
+                exit(EXIT_FAILURE);
+        }
+    }
+
+    for (int i = optind; i < argc; i++) {
+        params.target = fs::path(argv[i]);
+        break;
+    }
 }
 
-int main()
+void explore(const Params &params)
 {
+    fs::path target;
+
+    if (params.target.has_value()) {
+        target = params.target.value();
+    } else {
+        target = fs::current_path();
+    }
+
+    if (fs::exists(target)) {
+        run_tree(target);
+        return;
+    }
+
+    std::cerr << fmt::format("Directory '{}' does not exist\n", target.string());
+}
+
+int main(int argc, char **argv)
+{
+    Params params;
+    parse_cli(argc, argv, params);
+
     try {
-        explore();
+        explore(params);
     } catch (const fs::filesystem_error &e) {
         std::cerr << "Error: " << e.what() << '\n';
         return EXIT_FAILURE;
