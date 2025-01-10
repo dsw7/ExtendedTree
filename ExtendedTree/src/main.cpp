@@ -44,12 +44,17 @@ void explore(const Params &params)
         target = fs::current_path();
     }
 
-    if (fs::exists(target)) {
-        run_tree(target);
-        return;
+    if (!fs::exists(target)) {
+        std::cerr << fmt::format("Directory '{}' does not exist\n", target.string());
+        exit(EXIT_FAILURE);
     }
 
-    std::cerr << fmt::format("Directory '{}' does not exist\n", target.string());
+    if (!fs::is_directory(target)) {
+        std::cerr << fmt::format("'{}' is not a directory\n", target.string());
+        exit(EXIT_FAILURE);
+    }
+
+    run_tree(target);
 }
 
 int main(int argc, char **argv)
