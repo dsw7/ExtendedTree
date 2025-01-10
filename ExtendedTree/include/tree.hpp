@@ -2,4 +2,4 @@
 
 #include <filesystem>
 
-void explore(const std::filesystem::path &dir);
+void run_tree(const std::filesystem::path &dir);

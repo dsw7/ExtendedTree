@@ -3,12 +3,24 @@
 #include "utils.hpp"
 
 #include <filesystem>
+#include <fmt/core.h>
+
+namespace fs = std::filesystem;
+
+void explore()
+{
+    fs::path target = fs::current_path();
+    run_tree(target);
+}
 
 int main()
 {
-    std::filesystem::path target = std::filesystem::current_path();
-    print("Exploring directory: " + target.string());
+    try {
+        explore();
+    } catch (const fs::filesystem_error &e) {
+        print_error(e.what());
+        return EXIT_FAILURE;
+    }
 
-    explore(target);
     return 0;
 }

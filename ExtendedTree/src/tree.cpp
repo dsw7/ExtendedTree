@@ -5,7 +5,7 @@
 
 namespace fs = std::filesystem;
 
-void explore(const fs::path &dir)
+void run_tree(const fs::path &dir)
 {
     int depth = 0;
 
