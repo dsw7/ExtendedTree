@@ -1,9 +1,7 @@
 #include "tree.hpp"
 
-#include "utils.hpp"
-
 #include <filesystem>
-#include <fmt/core.h>
+#include <iostream>
 
 namespace fs = std::filesystem;
 
@@ -18,7 +16,7 @@ int main()
     try {
         explore();
     } catch (const fs::filesystem_error &e) {
-        print_error(e.what());
+        std::cerr << "Error: " << e.what() << '\n';
         return EXIT_FAILURE;
     }
 

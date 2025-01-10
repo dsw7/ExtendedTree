@@ -1,17 +1,12 @@
 #include "tree.hpp"
 
-#include "utils.hpp"
-#include <fmt/core.h>
+#include <iostream>
 
 namespace fs = std::filesystem;
 
 void run_tree(const fs::path &dir)
 {
-    int depth = 0;
-
     for (auto it = fs::recursive_directory_iterator(dir); it != fs::recursive_directory_iterator(); ++it) {
-        depth = it.depth();
-
-        fmt::print("{} {}\n", depth, *it);
+        std::cout << it.depth() << ' ' << *it << '\n';
     }
 }
