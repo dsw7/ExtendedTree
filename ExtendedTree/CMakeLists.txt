@@ -13,6 +13,18 @@ add_compile_definitions(BUILD_DATE="${BUILD_DATE}")
 
 add_compile_options(-Wall -Wextra -pedantic -Werror)
 
+# -----------------------------------------------------------------------------------------------------------
+# {fmt}
+
+message(STATUS "Locating {fmt} library")
+find_package(fmt)
+
+if(NOT fmt_FOUND)
+  message(FATAL_ERROR "Is the {fmt} package installed?")
+endif()
+
+# -----------------------------------------------------------------------------------------------------------
+
 include_directories(
   "external"
   "include"
@@ -22,6 +34,10 @@ add_executable(
   "src/main.cpp"
   "src/tree.cpp"
   "src/utils.cpp"
+)
+target_link_libraries(
+  "etree"
+  "fmt::fmt"
 )
 
 set(CMAKE_INSTALL_PREFIX "$ENV{HOME}/.local")

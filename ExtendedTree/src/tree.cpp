@@ -1,8 +1,17 @@
 #include "tree.hpp"
 
 #include "utils.hpp"
+#include <fmt/core.h>
 
-void explore(const std::filesystem::path &target)
+namespace fs = std::filesystem;
+
+void explore(const fs::path &dir)
 {
-    print("Exploring directory: " + target.string());
+    int depth = 0;
+
+    for (auto it = fs::recursive_directory_iterator(dir); it != fs::recursive_directory_iterator(); ++it) {
+        depth = it.depth();
+
+        fmt::print("{} {}\n", depth, *it);
+    }
 }

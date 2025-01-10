@@ -2,4 +2,4 @@
 
 #include <filesystem>
 
-void explore(const std::filesystem::path &target);
+void explore(const std::filesystem::path &dir);
