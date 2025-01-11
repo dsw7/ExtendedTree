@@ -8,7 +8,7 @@
 
 int main(int argc, char **argv)
 {
-    Params params = parse_cli(argc, argv);
+    const Params params = parse_cli(argc, argv);
 
     try {
         run_tree(params);

@@ -3,7 +3,6 @@
 #include <filesystem>
 #include <fmt/color.h>
 #include <fmt/core.h>
-#include <iostream>
 #include <map>
 #include <stdexcept>
 #include <string>
@@ -29,7 +28,7 @@ void process_file(const fs::recursive_directory_iterator &file, FileStats &stats
         ws[depth] = std::string(depth * tw, ' ');
     }
 
-    std::string filename = file->path().filename();
+    const std::string filename = file->path().filename();
 
     if (file->is_directory()) {
         fmt::print(fg(fmt::terminal_color::bright_blue), "{}{}/\n", ws[depth], filename);

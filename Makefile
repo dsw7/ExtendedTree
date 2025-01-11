@@ -18,7 +18,7 @@ help:
 	@echo "$$HELP_LIST_TARGETS"
 
 format:
-	@clang-format -i --verbose --style=file ExtendedTree/src/*.cpp ExtendedTree/include/*.hpp
+	@clang-format -i --verbose --style=file ExtendedTree/*.cpp ExtendedTree/*.hpp
 
 compile: format
 	@cmake -S ExtendedTree -B build
