@@ -4,6 +4,7 @@
 
 #include <filesystem>
 #include <iostream>
+#include <stdexcept>
 
 int main(int argc, char **argv)
 {
@@ -12,6 +13,9 @@ int main(int argc, char **argv)
     try {
         run_tree(params);
     } catch (const std::filesystem::filesystem_error &e) {
+        std::cerr << "Error: " << e.what() << '\n';
+        return EXIT_FAILURE;
+    } catch (const std::runtime_error &e) {
         std::cerr << "Error: " << e.what() << '\n';
         return EXIT_FAILURE;
     }
