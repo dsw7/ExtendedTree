@@ -12,7 +12,13 @@ namespace fs = std::filesystem;
 
 namespace {
 
-void process_file(const fs::recursive_directory_iterator &file)
+struct FileStats {
+    int num_directories = 0;
+    int num_files = 0;
+    int num_other = 0;
+};
+
+void process_file(const fs::recursive_directory_iterator &file, FileStats &stats)
 {
     int depth = file.depth();
 
@@ -27,16 +33,25 @@ void process_file(const fs::recursive_directory_iterator &file)
 
     if (file->is_directory()) {
         fmt::print(fg(fmt::terminal_color::bright_blue), "{}{}/\n", ws[depth], filename);
+        stats.num_directories++;
+    } else if (file->is_regular_file()) {
+        fmt::print("{}{}\n", ws[depth], filename);
+        stats.num_files++;
     } else {
-        std::cout << ws[depth] << filename << '\n';
+        stats.num_other++;
     }
 }
 
 void iterate_over_dirs(const fs::path &target)
 {
+    FileStats fs;
+
     for (auto it = fs::recursive_directory_iterator(target); it != fs::recursive_directory_iterator(); ++it) {
-        process_file(it);
+        process_file(it, fs);
     }
+
+    fmt::print("\nNumber of directories: {}\n", fs.num_directories);
+    fmt::print("Number of files: {}\n", fs.num_files);
 }
 
 } // namespace
