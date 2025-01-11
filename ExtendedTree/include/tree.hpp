@@ -1,5 +1,5 @@
 #pragma once
 
-#include <filesystem>
+#include "params.hpp"
 
-void run_tree(const std::filesystem::path &dir);
+void run_tree(const Params &params);
