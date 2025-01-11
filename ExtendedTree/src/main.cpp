@@ -1,38 +1,12 @@
 #include "tree.hpp"
 
+#include "params.hpp"
+
 #include <filesystem>
 #include <fmt/core.h>
 #include <iostream>
-#include <optional>
-#include <unistd.h>
 
 namespace fs = std::filesystem;
-
-struct Params {
-    std::optional<std::string> level = std::nullopt;
-    std::optional<fs::path> target = std::nullopt;
-};
-
-void parse_cli(int argc, char **argv, Params &params)
-{
-    int c = 0;
-
-    while ((c = getopt(argc, argv, "L:")) != -1) {
-        switch (c) {
-            case 'L':
-                params.level = optarg;
-                break;
-            default:
-                std::cerr << "Error parsing command line\n";
-                exit(EXIT_FAILURE);
-        }
-    }
-
-    for (int i = optind; i < argc; i++) {
-        params.target = fs::path(argv[i]);
-        break;
-    }
-}
 
 void explore(const Params &params)
 {
@@ -59,8 +33,7 @@ void explore(const Params &params)
 
 int main(int argc, char **argv)
 {
-    Params params;
-    parse_cli(argc, argv, params);
+    Params params = parse_cli(argc, argv);
 
     try {
         explore(params);

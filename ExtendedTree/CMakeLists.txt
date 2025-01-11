@@ -32,6 +32,7 @@ include_directories(
 add_executable(
   "etree"
   "src/main.cpp"
+  "src/params.cpp"
   "src/tree.cpp"
 )
 target_link_libraries(
