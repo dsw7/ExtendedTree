@@ -27,13 +27,12 @@ endif()
 
 include_directories(
   "external"
-  "include"
 )
 add_executable(
   "etree"
-  "src/main.cpp"
-  "src/params.cpp"
-  "src/tree.cpp"
+  "main.cpp"
+  "params.cpp"
+  "tree.cpp"
 )
 target_link_libraries(
   "etree"
