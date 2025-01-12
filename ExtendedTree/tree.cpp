@@ -24,27 +24,7 @@ struct FileStats {
     int num_other = 0;
 };
 
-void process_file(const fs::recursive_directory_iterator &file)
-{
-    int depth = file.depth() + 1;
-
-    static std::map<int, std::string> ws = {};
-    static int tw = 4;
-
-    if (!ws.contains(depth)) {
-        ws[depth] = std::string(depth * tw, ' ');
-    }
-
-    const std::string filename = file->path().filename();
-
-    if (file->is_directory()) {
-        fmt::print(fg(fmt::terminal_color::bright_blue), "{}{}/\n", ws[depth], filename);
-    } else if (file->is_regular_file()) {
-        fmt::print("{}{}\n", ws[depth], filename);
-    }
-}
-
-struct State {
+struct Line {
     bool is_directory = false;
     bool is_file = false;
     bool is_other = false;
@@ -55,50 +35,64 @@ struct State {
     std::string filename;
 };
 
-void map_directory_structure(const fs::recursive_directory_iterator &file, State &s)
+void map_directory_structure(const fs::recursive_directory_iterator &file, Line &line)
 {
-    s.depth = file.depth();
-    s.filename = file->path().filename();
+    line.depth = file.depth();
+    line.filename = file->path().filename();
 
     if (file->is_directory()) {
-        s.is_directory = true;
+        line.is_directory = true;
     } else if (file->is_regular_file()) {
-        s.is_file = true;
+        line.is_file = true;
     } else {
-        s.is_other = true;
+        line.is_other = true;
     }
 }
 
-void iterate_over_dirs(const fs::path &target, std::vector<State> &rows)
+void iterate_over_dirs(const fs::path &target, std::vector<Line> &lines)
 {
-    fmt::print(fg(fmt::terminal_color::bright_blue), "{}/\n", target.string());
-
     for (auto it = fs::recursive_directory_iterator(target); it != fs::recursive_directory_iterator(); ++it) {
-        process_file(it);
-
-        State state;
-        map_directory_structure(it, state);
-        rows.push_back(state);
+        Line line;
+        map_directory_structure(it, line);
+        lines.push_back(line);
     }
 }
 
-void compute_change_in_depth(std::vector<State> &rows)
+void compute_change_in_depth(std::vector<Line> &lines)
 {
-    int num_rows = rows.size();
+    int num_lines = lines.size();
 
-    for (int i = 0; i < num_rows; i++) {
+    for (int i = 0; i < num_lines; i++) {
         if (i > 0) {
-            rows[i].depth_delta = rows[i].depth - rows[i - 1].depth;
+            lines[i].depth_delta = lines[i].depth - lines[i - 1].depth;
         }
     }
 }
 
-void process_rows(const std::vector<State> &rows)
+void process_line(const Line &line)
 {
-    int size = rows.size() - 1;
+    int depth = line.depth + 1;
+
+    static std::map<int, std::string> ws = {};
+    static int tw = 4;
+
+    if (!ws.contains(depth)) {
+        ws[depth] = std::string(depth * tw, ' ');
+    }
+
+    if (line.is_directory) {
+        fmt::print(fg(fmt::terminal_color::bright_blue), "{}{}/ {}\n", ws[depth], line.filename, line.depth_delta);
+    } else if (line.is_file) {
+        fmt::print("{}{} {}\n", ws[depth], line.filename, line.depth_delta);
+    }
+}
+
+void process_lines(const std::vector<Line> &lines)
+{
+    int size = lines.size() - 1;
 
     for (int i = 0; i <= size; i++) {
-        fmt::print("{} {} {}\n", rows[i].filename, rows[i].depth, rows[i].depth_delta);
+        process_line(lines[i]);
     }
 }
 
@@ -122,10 +116,10 @@ void run_tree(const Params &params)
         throw std::runtime_error(fmt::format("'{}' is not a directory", target.string()));
     }
 
-    std::vector<State> rows;
-    iterate_over_dirs(target, rows);
-    compute_change_in_depth(rows);
+    std::vector<Line> lines;
+    iterate_over_dirs(target, lines);
+    compute_change_in_depth(lines);
 
     fmt::print(fg(fmt::terminal_color::bright_blue), "{}/\n", target.string());
-    process_rows(rows);
+    process_lines(lines);
 }
