@@ -10,12 +10,6 @@
 
 namespace fs = std::filesystem;
 
-namespace shapes {
-const std::string elbow = "└";
-const std::string hline = "─";
-const std::string vline = "│";
-} // namespace shapes
-
 namespace {
 
 struct FileStats {
@@ -69,6 +63,28 @@ void compute_change_in_depth(std::vector<Line> &lines)
     }
 }
 
+std::string get_prefix(int width)
+{
+    static std::string elbow = "└";
+    static std::string hline = "─";
+    static std::string tee = "├";
+    static std::string vline = "│";
+
+    std::string prefix;
+
+    for (int i = 0; i < width - 1; i++) {
+        if (i == 0) {
+            prefix += tee;
+            continue;
+        }
+
+        prefix += hline;
+    }
+
+    prefix += ' ';
+    return prefix;
+}
+
 void process_line(const Line &line)
 {
     int depth = line.depth + 1;
@@ -77,7 +93,7 @@ void process_line(const Line &line)
     static int tw = 4;
 
     if (!ws.contains(depth)) {
-        ws[depth] = std::string(depth * tw, ' ');
+        ws[depth] = get_prefix(depth * tw);
     }
 
     if (line.is_directory) {
