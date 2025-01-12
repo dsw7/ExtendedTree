@@ -57,7 +57,7 @@ struct State {
 
 void map_directory_structure(const fs::recursive_directory_iterator &file, State &s)
 {
-    s.depth = file.depth() + 1;
+    s.depth = file.depth();
     s.filename = file->path().filename();
 
     if (file->is_directory()) {
