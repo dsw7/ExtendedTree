@@ -9,6 +9,12 @@
 
 namespace fs = std::filesystem;
 
+namespace shapes {
+const std::string elbow = "└";
+const std::string hline = "─";
+const std::string vline = "│";
+} // namespace shapes
+
 namespace {
 
 struct FileStats {
@@ -19,7 +25,7 @@ struct FileStats {
 
 void process_file(const fs::recursive_directory_iterator &file, FileStats &stats)
 {
-    int depth = file.depth();
+    int depth = file.depth() + 1;
 
     static std::map<int, std::string> ws = {};
     static int tw = 4;
@@ -43,8 +49,9 @@ void process_file(const fs::recursive_directory_iterator &file, FileStats &stats
 
 void iterate_over_dirs(const fs::path &target)
 {
-    FileStats fs;
+    fmt::print(fg(fmt::terminal_color::bright_blue), "{}/\n", target.string());
 
+    FileStats fs;
     for (auto it = fs::recursive_directory_iterator(target); it != fs::recursive_directory_iterator(); ++it) {
         process_file(it, fs);
     }
