@@ -24,7 +24,7 @@ struct FileStats {
     int num_other = 0;
 };
 
-void process_file(const fs::recursive_directory_iterator &file, FileStats &stats)
+void process_file(const fs::recursive_directory_iterator &file)
 {
     int depth = file.depth() + 1;
 
@@ -39,12 +39,8 @@ void process_file(const fs::recursive_directory_iterator &file, FileStats &stats
 
     if (file->is_directory()) {
         fmt::print(fg(fmt::terminal_color::bright_blue), "{}{}/\n", ws[depth], filename);
-        stats.num_directories++;
     } else if (file->is_regular_file()) {
         fmt::print("{}{}\n", ws[depth], filename);
-        stats.num_files++;
-    } else {
-        stats.num_other++;
     }
 }
 
@@ -58,7 +54,7 @@ struct State {
 
 void map_directory_structure(const fs::recursive_directory_iterator &file, State &s)
 {
-    s.depth = file.depth();
+    s.depth = file.depth() + 1;
     s.filename = file->path().filename();
 
     if (file->is_directory()) {
@@ -74,23 +70,28 @@ void iterate_over_dirs(const fs::path &target, std::vector<State> &rows)
 {
     fmt::print(fg(fmt::terminal_color::bright_blue), "{}/\n", target.string());
 
-    FileStats fs;
     for (auto it = fs::recursive_directory_iterator(target); it != fs::recursive_directory_iterator(); ++it) {
-        process_file(it, fs);
+        process_file(it);
 
         State state;
         map_directory_structure(it, state);
         rows.push_back(state);
     }
-
-    fmt::print("\nNumber of directories: {}\n", fs.num_directories);
-    fmt::print("Number of files: {}\n", fs.num_files);
 }
 
 void process_rows(const std::vector<State> &rows)
 {
-    for (auto it = rows.begin(); it != rows.end(); it++) {
-        fmt::print("{} {}\n", it->filename, it->depth);
+    int size = rows.size() - 1;
+    int step = 0;
+
+    for (int i = 0; i <= size; i++) {
+        if (i < 1) {
+            fmt::print("{} {}\n", rows[i].filename, rows[i].depth);
+            continue;
+        }
+
+        step = rows[i].depth - rows[i - 1].depth;
+        fmt::print("{} {} {}\n", rows[i].filename, rows[i].depth, step);
     }
 }
 
@@ -116,5 +117,7 @@ void run_tree(const Params &params)
 
     std::vector<State> rows;
     iterate_over_dirs(target, rows);
+
+    fmt::print(fg(fmt::terminal_color::bright_blue), "{}/\n", target.string());
     process_rows(rows);
 }
