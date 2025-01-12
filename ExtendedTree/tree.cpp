@@ -23,7 +23,7 @@ struct Line {
     bool is_file = false;
     bool is_other = false;
 
-    int depth_delta = -100;
+    int depth_delta = 1;
     int depth = 0;
 
     std::string filename;
@@ -96,10 +96,12 @@ void process_line(const Line &line)
         ws[depth] = get_prefix(depth * tw);
     }
 
+    fmt::print("{}", ws[depth]);
+
     if (line.is_directory) {
-        fmt::print(fg(fmt::terminal_color::bright_blue), "{}{}/ {}\n", ws[depth], line.filename, line.depth_delta);
+        fmt::print(fg(fmt::terminal_color::bright_blue), "{}/ {}\n", line.filename, line.depth_delta);
     } else if (line.is_file) {
-        fmt::print("{}{} {}\n", ws[depth], line.filename, line.depth_delta);
+        fmt::print("{} {}\n", line.filename, line.depth_delta);
     }
 }
 
