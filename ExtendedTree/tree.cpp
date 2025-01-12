@@ -48,7 +48,10 @@ struct State {
     bool is_directory = false;
     bool is_file = false;
     bool is_other = false;
+
+    int depth_delta = -100;
     int depth = 0;
+
     std::string filename;
 };
 
@@ -79,19 +82,23 @@ void iterate_over_dirs(const fs::path &target, std::vector<State> &rows)
     }
 }
 
+void compute_change_in_depth(std::vector<State> &rows)
+{
+    int num_rows = rows.size();
+
+    for (int i = 0; i < num_rows; i++) {
+        if (i > 0) {
+            rows[i].depth_delta = rows[i].depth - rows[i - 1].depth;
+        }
+    }
+}
+
 void process_rows(const std::vector<State> &rows)
 {
     int size = rows.size() - 1;
-    int step = 0;
 
     for (int i = 0; i <= size; i++) {
-        if (i < 1) {
-            fmt::print("{} {}\n", rows[i].filename, rows[i].depth);
-            continue;
-        }
-
-        step = rows[i].depth - rows[i - 1].depth;
-        fmt::print("{} {} {}\n", rows[i].filename, rows[i].depth, step);
+        fmt::print("{} {} {}\n", rows[i].filename, rows[i].depth, rows[i].depth_delta);
     }
 }
 
@@ -117,6 +124,7 @@ void run_tree(const Params &params)
 
     std::vector<State> rows;
     iterate_over_dirs(target, rows);
+    compute_change_in_depth(rows);
 
     fmt::print(fg(fmt::terminal_color::bright_blue), "{}/\n", target.string());
     process_rows(rows);
