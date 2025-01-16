@@ -16,7 +16,7 @@ const std::string hline = "─";
 const std::string tee = "├";
 const std::string vline = "│";
 
-std::map<int, std::string> ws = {};
+std::map<int, std::string> ws;
 
 struct Stats {
     int num_directories = 0;
@@ -34,35 +34,33 @@ void insert_new_ws(int depth)
 
 void print_dir(int depth, const fs::directory_entry &dir, uintmax_t dir_size)
 {
-    insert_new_ws(depth);
     fmt::print(fg(fmt::terminal_color::bright_blue), "{}{}/ ", ws[depth], dir.path().filename().string());
     fmt::print(fg(fmt::terminal_color::bright_green), "{}\n", dir_size);
 }
 
-uintmax_t print_file(int depth, const fs::directory_entry &file)
+void print_file(int depth, const fs::directory_entry &file, uintmax_t file_size)
 {
-    insert_new_ws(depth);
-    uintmax_t size = fs::file_size(file);
-
-    fmt::print("{}{} {}\n", ws[depth], file.path().filename().string(), size);
-    return size;
+    fmt::print("{}{} {}\n", ws[depth], file.path().filename().string(), file_size);
 }
 
-uintmax_t iterate_over_dirs(const std::string &dir, Stats &stats, int depth = 0)
+uintmax_t iterate_over_dirs(const std::string &dir, Stats &stats, int depth)
 {
+    insert_new_ws(depth);
+
     uintmax_t dir_total_size = 0;
 
     for (auto const &entry: fs::directory_iterator { dir }) {
 
         if (entry.is_directory()) {
+            stats.num_directories++;
             uintmax_t dir_size = iterate_over_dirs(entry.path().string(), stats, depth + 1);
             print_dir(depth, entry, dir_size);
             dir_total_size += dir_size;
-            stats.num_directories++;
         } else if (entry.is_regular_file()) {
-            uintmax_t file_size = print_file(depth, entry);
-            dir_total_size += file_size;
             stats.num_files++;
+            uintmax_t file_size = fs::file_size(entry);
+            print_file(depth, entry, file_size);
+            dir_total_size += file_size;
         } else {
             stats.num_other++;
         }
@@ -102,7 +100,8 @@ void run_tree(const Params &params)
     fmt::print(fg(fmt::terminal_color::bright_blue), "{}/\n", target.string());
 
     Stats stats;
-    uintmax_t total_size = iterate_over_dirs(target, stats);
+    int start_depth = 1;
+    uintmax_t total_size = iterate_over_dirs(target, stats, start_depth);
     stats.total_size = total_size;
 
     print_report(stats);
