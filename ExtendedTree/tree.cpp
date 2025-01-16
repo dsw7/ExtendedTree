@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <fmt/color.h>
 #include <fmt/core.h>
+#include <iostream>
 #include <map>
 #include <stdexcept>
 #include <string>
@@ -12,106 +13,64 @@ namespace fs = std::filesystem;
 
 namespace {
 
-struct FileStats {
-    int num_directories = 0;
-    int num_files = 0;
-    int num_other = 0;
+const std::string elbow = "└";
+const std::string hline = "─";
+const std::string tee = "├";
+const std::string vline = "│";
+
+std::map<int, std::string> ws = {};
+
+struct Stats {
+    uintmax_t size = 0;
 };
 
-struct Line {
-    bool is_directory = false;
-    bool is_file = false;
-    bool is_other = false;
-
-    int depth_delta = 1;
-    int depth = 0;
-
-    std::string filename;
-};
-
-void map_directory_structure(const fs::recursive_directory_iterator &file, Line &line)
+void insert_new_ws(int depth)
 {
-    line.depth = file.depth();
-    line.filename = file->path().filename();
-
-    if (file->is_directory()) {
-        line.is_directory = true;
-    } else if (file->is_regular_file()) {
-        line.is_file = true;
-    } else {
-        line.is_other = true;
-    }
-}
-
-void iterate_over_dirs(const fs::path &target, std::vector<Line> &lines)
-{
-    for (auto it = fs::recursive_directory_iterator(target); it != fs::recursive_directory_iterator(); ++it) {
-        Line line;
-        map_directory_structure(it, line);
-        lines.push_back(line);
-    }
-}
-
-void compute_change_in_depth(std::vector<Line> &lines)
-{
-    int num_lines = lines.size();
-
-    for (int i = 0; i < num_lines; i++) {
-        if (i > 0) {
-            lines[i].depth_delta = lines[i].depth - lines[i - 1].depth;
-        }
-    }
-}
-
-std::string get_prefix(int width)
-{
-    static std::string elbow = "└";
-    static std::string hline = "─";
-    static std::string tee = "├";
-    static std::string vline = "│";
-
-    std::string prefix;
-
-    for (int i = 0; i < width - 1; i++) {
-        if (i == 0) {
-            prefix += tee;
-            continue;
-        }
-
-        prefix += hline;
-    }
-
-    prefix += ' ';
-    return prefix;
-}
-
-void process_line(const Line &line)
-{
-    int depth = line.depth + 1;
-
-    static std::map<int, std::string> ws = {};
-    static int tw = 4;
-
     if (!ws.contains(depth)) {
-        ws[depth] = get_prefix(depth * tw);
-    }
-
-    fmt::print("{}", ws[depth]);
-
-    if (line.is_directory) {
-        fmt::print(fg(fmt::terminal_color::bright_blue), "{}/ {}\n", line.filename, line.depth_delta);
-    } else if (line.is_file) {
-        fmt::print("{} {}\n", line.filename, line.depth_delta);
+        ws.emplace(depth, std::string(depth * 4, ' '));
     }
 }
 
-void process_lines(const std::vector<Line> &lines)
+void print_dir(int depth, const fs::directory_entry &dir, uintmax_t dir_size)
 {
-    int size = lines.size() - 1;
+    insert_new_ws(depth);
+    std::cout << ws[depth] << dir.path().filename() << "/ " << dir_size << '\n';
+}
 
-    for (int i = 0; i <= size; i++) {
-        process_line(lines[i]);
+uintmax_t print_file(int depth, const fs::directory_entry &file)
+{
+    insert_new_ws(depth);
+    uintmax_t size = fs::file_size(file);
+
+    std::cout << ws[depth] << file.path().filename() << ' ' << size << '\n';
+    return size;
+}
+
+uintmax_t iterate_over_dirs(const std::string &dir, Stats &s, int depth = 0)
+{
+    uintmax_t dir_total_size = 0;
+
+    for (auto const &dir_entry: fs::directory_iterator { dir }) {
+
+        if (dir_entry.is_directory()) {
+            uintmax_t dir_size = iterate_over_dirs(dir_entry.path().string(), s, depth + 1);
+            print_dir(depth, dir_entry, dir_size);
+            dir_total_size += dir_size;
+        }
+
+        if (dir_entry.is_regular_file()) {
+            uintmax_t file_size = print_file(depth, dir_entry);
+            dir_total_size += file_size;
+            s.size += file_size;
+        }
     }
+
+    return dir_total_size;
+}
+
+void print_report(const Stats &stats)
+{
+    fmt::print("Total size: {}\n", stats.size);
 }
 
 } // namespace
@@ -134,10 +93,10 @@ void run_tree(const Params &params)
         throw std::runtime_error(fmt::format("'{}' is not a directory", target.string()));
     }
 
-    std::vector<Line> lines;
-    iterate_over_dirs(target, lines);
-    compute_change_in_depth(lines);
-
     fmt::print(fg(fmt::terminal_color::bright_blue), "{}/\n", target.string());
-    process_lines(lines);
+
+    Stats stats;
+    iterate_over_dirs(target, stats);
+
+    print_report(stats);
 }
