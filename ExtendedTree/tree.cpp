@@ -3,11 +3,9 @@
 #include <filesystem>
 #include <fmt/color.h>
 #include <fmt/core.h>
-#include <iostream>
 #include <map>
 #include <stdexcept>
 #include <string>
-#include <vector>
 
 namespace fs = std::filesystem;
 
@@ -21,7 +19,10 @@ const std::string vline = "│";
 std::map<int, std::string> ws = {};
 
 struct Stats {
-    uintmax_t size = 0;
+    int num_directories = 0;
+    int num_files = 0;
+    int num_other = 0;
+    uintmax_t total_size = 0;
 };
 
 void insert_new_ws(int depth)
@@ -34,7 +35,8 @@ void insert_new_ws(int depth)
 void print_dir(int depth, const fs::directory_entry &dir, uintmax_t dir_size)
 {
     insert_new_ws(depth);
-    std::cout << ws[depth] << dir.path().filename() << "/ " << dir_size << '\n';
+    fmt::print(fg(fmt::terminal_color::bright_blue), "{}{}/ ", ws[depth], dir.path().filename().string());
+    fmt::print(fg(fmt::terminal_color::bright_green), "{}\n", dir_size);
 }
 
 uintmax_t print_file(int depth, const fs::directory_entry &file)
@@ -42,26 +44,27 @@ uintmax_t print_file(int depth, const fs::directory_entry &file)
     insert_new_ws(depth);
     uintmax_t size = fs::file_size(file);
 
-    std::cout << ws[depth] << file.path().filename() << ' ' << size << '\n';
+    fmt::print("{}{} {}\n", ws[depth], file.path().filename().string(), size);
     return size;
 }
 
-uintmax_t iterate_over_dirs(const std::string &dir, Stats &s, int depth = 0)
+uintmax_t iterate_over_dirs(const std::string &dir, Stats &stats, int depth = 0)
 {
     uintmax_t dir_total_size = 0;
 
-    for (auto const &dir_entry: fs::directory_iterator { dir }) {
+    for (auto const &entry: fs::directory_iterator { dir }) {
 
-        if (dir_entry.is_directory()) {
-            uintmax_t dir_size = iterate_over_dirs(dir_entry.path().string(), s, depth + 1);
-            print_dir(depth, dir_entry, dir_size);
+        if (entry.is_directory()) {
+            uintmax_t dir_size = iterate_over_dirs(entry.path().string(), stats, depth + 1);
+            print_dir(depth, entry, dir_size);
             dir_total_size += dir_size;
-        }
-
-        if (dir_entry.is_regular_file()) {
-            uintmax_t file_size = print_file(depth, dir_entry);
+            stats.num_directories++;
+        } else if (entry.is_regular_file()) {
+            uintmax_t file_size = print_file(depth, entry);
             dir_total_size += file_size;
-            s.size += file_size;
+            stats.num_files++;
+        } else {
+            stats.num_other++;
         }
     }
 
@@ -70,7 +73,10 @@ uintmax_t iterate_over_dirs(const std::string &dir, Stats &s, int depth = 0)
 
 void print_report(const Stats &stats)
 {
-    fmt::print("Total size: {}\n", stats.size);
+    fmt::print("\nTotal size: {} bytes\n", stats.total_size);
+    fmt::print("Number of directories: {}\n", stats.num_directories);
+    fmt::print("Number of files: {}\n", stats.num_files);
+    fmt::print("Number of other file-like objects: {}\n", stats.num_other);
 }
 
 } // namespace
@@ -96,7 +102,8 @@ void run_tree(const Params &params)
     fmt::print(fg(fmt::terminal_color::bright_blue), "{}/\n", target.string());
 
     Stats stats;
-    iterate_over_dirs(target, stats);
+    uintmax_t total_size = iterate_over_dirs(target, stats);
+    stats.total_size = total_size;
 
     print_report(stats);
 }
