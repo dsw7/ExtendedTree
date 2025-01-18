@@ -37,6 +37,7 @@ struct FileNode {
 };
 
 struct Stats {
+    int max_depth = 0;
     int num_directories = 0;
     int num_files = 0;
     int num_other = 0;
@@ -95,8 +96,10 @@ FileType inspect_entry(const fs::directory_entry &entry, Stats &stats, std::opti
     return OTHER;
 }
 
-void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stats)
+void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stats, int depth = 0)
 {
+    stats.max_depth = ++depth;
+
     for (auto const &entry: fs::directory_iterator { dir }) {
         std::optional<uintmax_t> size = std::nullopt;
         FileType filetype = inspect_entry(entry, stats, size);
@@ -105,7 +108,7 @@ void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stat
         std::unique_ptr<FileNode> child = std::make_unique<FileNode>(filename, filetype, size);
 
         if (filetype == DIRECTORY) {
-            precompute_dir_layout(entry.path().string(), *child, stats);
+            precompute_dir_layout(entry.path().string(), *child, stats, depth);
         }
 
         parent.children.push_back(std::move(child));
@@ -146,7 +149,8 @@ void run_tree(const Params &params)
 
     Stats stats;
     precompute_dir_layout(target_s, *root, stats);
-    traverse_dir_layout(root);
+    print_ruler(stats.max_depth);
 
+    traverse_dir_layout(root);
     print_report(stats);
 }
