@@ -27,13 +27,15 @@ enum FileType {
 
 struct FileNode {
     FileType filetype = REGULAR_FILE;
+    std::optional<uintmax_t> filesize = std::nullopt;
     std::string filename;
     std::vector<std::unique_ptr<FileNode>> children;
 
-    FileNode(const std::string &filename, const FileType filetype)
+    FileNode(const std::string &filename, const FileType filetype, const std::optional<uintmax_t> &filesize)
     {
         this->filename = filename;
         this->filetype = filetype;
+        this->filesize = filesize;
     }
 };
 
@@ -54,7 +56,7 @@ void print(int depth, const std::unique_ptr<FileNode> &node)
 
     switch (node->filetype) {
         case REGULAR_FILE:
-            fmt::print("{}{}\n", ws[depth], node->filename);
+            fmt::print("{}{} {}\n", ws[depth], node->filename, node->filesize.value());
             break;
         case DIRECTORY:
             fmt::print(fg(fmt::terminal_color::bright_blue), "{}{}/\n", ws[depth], node->filename);
@@ -103,7 +105,7 @@ void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stat
         FileType filetype = inspect_entry(entry, stats, size);
 
         std::string filename = entry.path().filename();
-        std::unique_ptr<FileNode> child = std::make_unique<FileNode>(filename, filetype);
+        std::unique_ptr<FileNode> child = std::make_unique<FileNode>(filename, filetype, size);
 
         if (filetype == DIRECTORY) {
             precompute_dir_layout(entry.path().string(), *child, stats);
@@ -141,7 +143,7 @@ void run_tree(const Params &params)
         throw std::runtime_error(fmt::format("'{}' is not a directory", target.string()));
     }
 
-    auto root = std::make_unique<FileNode>(target.string(), DIRECTORY);
+    auto root = std::make_unique<FileNode>(target.string(), DIRECTORY, std::nullopt);
     Stats stats;
 
     precompute_dir_layout(target.string(), *root, stats);
