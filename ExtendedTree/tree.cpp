@@ -153,5 +153,6 @@ void run_tree(const Params &params)
     print_ruler(stats.max_depth);
 
     traverse_dir_layout(root);
+    print_ruler_bottom(stats.max_depth);
     print_report(stats);
 }
