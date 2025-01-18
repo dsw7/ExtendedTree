@@ -36,6 +36,13 @@ struct FileNode {
     }
 };
 
+struct Stats {
+    int num_directories = 0;
+    int num_files = 0;
+    int num_other = 0;
+    uintmax_t total_size = 0;
+};
+
 void print(int depth, const std::unique_ptr<FileNode> &node)
 {
     static std::map<int, std::string> ws;
@@ -69,38 +76,36 @@ void traverse(const std::unique_ptr<FileNode> &node, int depth = 0)
     }
 }
 
-struct Stats {
-    int num_directories = 0;
-    int num_files = 0;
-    int num_other = 0;
-    uintmax_t total_size = 0;
-};
-
-void iterate_over_dirs(const std::string &dir, FileNode &parent)
+void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stats)
 {
     for (auto const &entry: fs::directory_iterator { dir }) {
         FileType filetype;
 
         if (entry.is_regular_file()) {
             filetype = REGULAR_FILE;
+            stats.num_files++;
+
+            uintmax_t size = fs::file_size(entry);
+            stats.total_size += size;
         } else if (entry.is_directory()) {
             filetype = DIRECTORY;
+            stats.num_directories++;
         } else {
             filetype = OTHER;
+            stats.num_other++;
         }
 
         std::string filename = entry.path().filename();
         std::unique_ptr<FileNode> child = std::make_unique<FileNode>(filename, filetype);
 
         if (filetype == DIRECTORY) {
-            iterate_over_dirs(entry.path().string(), *child);
+            precompute_dir_layout(entry.path().string(), *child, stats);
         }
 
         parent.children.push_back(std::move(child));
     }
 }
 
-/*
 void print_report(const Stats &stats)
 {
     fmt::print("\nTotal size: {} bytes\n", stats.total_size);
@@ -108,7 +113,6 @@ void print_report(const Stats &stats)
     fmt::print("Number of files: {}\n", stats.num_files);
     fmt::print("Number of other file-like objects: {}\n", stats.num_other);
 }
-*/
 
 } // namespace
 
@@ -131,15 +135,10 @@ void run_tree(const Params &params)
     }
 
     auto root = std::make_unique<FileNode>(target.string(), DIRECTORY);
-    iterate_over_dirs(target.string(), *root);
+    Stats stats;
+
+    precompute_dir_layout(target.string(), *root, stats);
     traverse(root);
 
-    /*
-    Stats stats;
-    int start_depth = 1;
-    uintmax_t total_size = iterate_over_dirs(target, stats, start_depth);
-    stats.total_size = total_size;
-    */
-
-    // print_report(stats);
+    print_report(stats);
 }
