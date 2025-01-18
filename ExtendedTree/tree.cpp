@@ -150,9 +150,10 @@ void run_tree(const Params &params)
 
     Stats stats;
     precompute_dir_layout(target_s, *root, stats);
-    print_ruler(stats.max_depth);
 
+    print_ruler(stats.max_depth, true);
     traverse_dir_layout(root);
-    print_ruler_bottom(stats.max_depth);
+    print_ruler(stats.max_depth, false);
+
     print_report(stats);
 }

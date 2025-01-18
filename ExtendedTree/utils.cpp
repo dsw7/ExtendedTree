@@ -4,13 +4,69 @@
 
 namespace {
 
-const std::string bl_elbow = "└";
-const std::string br_elbow = "┘";
-const std::string d_tee = "┬";
 const std::string hline = "─";
-const std::string tl_elbow = "┌";
-const std::string tr_elbow = "┐";
-const std::string u_tee = "┴";
+
+void get_top_ruler(int length, std::string &scale, std::string &ruler)
+{
+    static std::string elbow_l = "└";
+    static std::string elbow_r = "┘";
+    static std::string tee = "┴";
+
+    int inc = 0;
+
+    for (int i = 0; i <= length; i++) {
+        if (i == 0) {
+            scale += std::to_string(0);
+            ruler += elbow_l;
+            continue;
+        }
+
+        if (i == length) {
+            scale += std::to_string(++inc);
+            ruler += elbow_r;
+            continue;
+        }
+
+        if (i % 4 == 0) {
+            scale += std::to_string(++inc);
+            ruler += tee;
+        } else {
+            scale += ' ';
+            ruler += hline;
+        }
+    }
+}
+
+void get_bottom_ruler(int length, std::string &scale, std::string &ruler)
+{
+    static std::string elbow_l = "┌";
+    static std::string elbow_r = "┐";
+    static std::string tee = "┬";
+
+    int inc = 0;
+
+    for (int i = 0; i <= length; i++) {
+        if (i == 0) {
+            scale += std::to_string(0);
+            ruler += elbow_l;
+            continue;
+        }
+
+        if (i == length) {
+            scale += std::to_string(++inc);
+            ruler += elbow_r;
+            continue;
+        }
+
+        if (i % 4 == 0) {
+            scale += std::to_string(++inc);
+            ruler += tee;
+        } else {
+            scale += ' ';
+            ruler += hline;
+        }
+    }
+}
 
 } // namespace
 
@@ -25,7 +81,7 @@ void strip_extra_path_delimiter(std::string &path)
     }
 }
 
-void print_ruler(int depth)
+void print_ruler(int depth, bool top)
 {
     if (depth < 1) {
         return;
@@ -34,67 +90,13 @@ void print_ruler(int depth)
     std::string scale;
     std::string ruler;
 
-    int max = depth * TAB_WIDTH;
-    int inc = 0;
+    int length = depth * TAB_WIDTH;
 
-    for (int i = 0; i <= max; i++) {
-        if (i == 0) {
-            scale += std::to_string(0);
-            ruler += bl_elbow;
-            continue;
-        }
-
-        if (i == max) {
-            scale += std::to_string(++inc);
-            ruler += br_elbow;
-            continue;
-        }
-
-        if (i % 4 == 0) {
-            scale += std::to_string(++inc);
-            ruler += u_tee;
-        } else {
-            scale += ' ';
-            ruler += hline;
-        }
+    if (top) {
+        get_top_ruler(length, scale, ruler);
+        fmt::print("{}\n{}\n", scale, ruler);
+    } else {
+        get_bottom_ruler(length, scale, ruler);
+        fmt::print("{}\n{}\n", ruler, scale);
     }
-
-    fmt::print("{}\n{}\n", scale, ruler);
-}
-
-void print_ruler_bottom(int depth)
-{
-    if (depth < 1) {
-        return;
-    }
-
-    std::string scale;
-    std::string ruler;
-
-    int max = depth * TAB_WIDTH;
-    int inc = 0;
-
-    for (int i = 0; i <= max; i++) {
-        if (i == 0) {
-            scale += std::to_string(0);
-            ruler += tl_elbow;
-            continue;
-        }
-
-        if (i == max) {
-            scale += std::to_string(++inc);
-            ruler += tr_elbow;
-            continue;
-        }
-
-        if (i % 4 == 0) {
-            scale += std::to_string(++inc);
-            ruler += d_tee;
-        } else {
-            scale += ' ';
-            ruler += hline;
-        }
-    }
-
-    fmt::print("{}\n{}\n", ruler, scale);
 }
