@@ -33,6 +33,7 @@ add_executable(
   "main.cpp"
   "params.cpp"
   "tree.cpp"
+  "utils.cpp"
 )
 target_link_libraries(
   "etree"
