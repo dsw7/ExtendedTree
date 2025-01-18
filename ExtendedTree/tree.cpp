@@ -69,13 +69,13 @@ void print(int depth, const std::unique_ptr<FileNode> &node)
     }
 }
 
-void traverse(const std::unique_ptr<FileNode> &node, int depth = 0)
+void traverse_dir_layout(const std::unique_ptr<FileNode> &node, int depth = 0)
 {
     print(depth, node);
     depth++;
 
     for (const auto &child: node->children) {
-        traverse(child, depth);
+        traverse_dir_layout(child, depth);
     }
 }
 
@@ -135,19 +135,21 @@ void run_tree(const Params &params)
         target = fs::current_path();
     }
 
+    const std::string target_s = target.string();
+
     if (!fs::exists(target)) {
-        throw std::runtime_error(fmt::format("Directory '{}' does not exist", target.string()));
+        throw std::runtime_error(fmt::format("Directory '{}' does not exist", target_s));
     }
 
     if (!fs::is_directory(target)) {
-        throw std::runtime_error(fmt::format("'{}' is not a directory", target.string()));
+        throw std::runtime_error(fmt::format("'{}' is not a directory", target_s));
     }
 
-    auto root = std::make_unique<FileNode>(target.string(), DIRECTORY, std::nullopt);
-    Stats stats;
+    auto root = std::make_unique<FileNode>(target_s, DIRECTORY, std::nullopt);
 
-    precompute_dir_layout(target.string(), *root, stats);
-    traverse(root);
+    Stats stats;
+    precompute_dir_layout(target_s, *root, stats);
+    traverse_dir_layout(root);
 
     print_report(stats);
 }
