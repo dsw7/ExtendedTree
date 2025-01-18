@@ -123,6 +123,17 @@ void print_report(const Stats &stats)
     fmt::print("Number of other file-like objects: {}\n", stats.num_other);
 }
 
+void strip_extra_path_delimiter(std::string &target)
+{
+    if (target.size() < 2) {
+        return;
+    }
+
+    if (target.back() == '/') {
+        target.pop_back();
+    }
+}
+
 } // namespace
 
 void run_tree(const Params &params)
@@ -135,7 +146,8 @@ void run_tree(const Params &params)
         target = fs::current_path();
     }
 
-    const std::string target_s = target.string();
+    std::string target_s = target.string();
+    strip_extra_path_delimiter(target_s);
 
     if (!fs::exists(target)) {
         throw std::runtime_error(fmt::format("Directory '{}' does not exist", target_s));
