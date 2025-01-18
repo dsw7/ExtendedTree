@@ -123,17 +123,6 @@ void print_report(const Stats &stats)
     fmt::print("Number of other file-like objects: {}\n", stats.num_other);
 }
 
-void strip_extra_path_delimiter(std::string &target)
-{
-    if (target.size() < 2) {
-        return;
-    }
-
-    if (target.back() == '/') {
-        target.pop_back();
-    }
-}
-
 } // namespace
 
 void run_tree(const Params &params)

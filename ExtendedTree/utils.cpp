@@ -1,7 +1,6 @@
 #include "utils.hpp"
 
 #include <fmt/core.h>
-#include <string>
 
 namespace {
 
@@ -11,6 +10,17 @@ const std::string hline = "─";
 const std::string htee = "┴";
 
 } // namespace
+
+void strip_extra_path_delimiter(std::string &path)
+{
+    if (path.size() < 2) {
+        return;
+    }
+
+    if (path.back() == '/') {
+        path.pop_back();
+    }
+}
 
 void print_ruler(int depth)
 {
