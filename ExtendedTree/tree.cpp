@@ -5,6 +5,7 @@
 #include <fmt/core.h>
 #include <map>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -76,24 +77,30 @@ void traverse(const std::unique_ptr<FileNode> &node, int depth = 0)
     }
 }
 
+FileType inspect_entry(const fs::directory_entry &entry, Stats &stats, std::optional<uintmax_t> &size)
+{
+    if (entry.is_regular_file()) {
+        size = fs::file_size(entry);
+
+        stats.num_files++;
+        stats.total_size += size.value();
+        return REGULAR_FILE;
+    }
+
+    if (entry.is_directory()) {
+        stats.num_directories++;
+        return DIRECTORY;
+    }
+
+    stats.num_other++;
+    return OTHER;
+}
+
 void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stats)
 {
     for (auto const &entry: fs::directory_iterator { dir }) {
-        FileType filetype;
-
-        if (entry.is_regular_file()) {
-            filetype = REGULAR_FILE;
-            stats.num_files++;
-
-            uintmax_t size = fs::file_size(entry);
-            stats.total_size += size;
-        } else if (entry.is_directory()) {
-            filetype = DIRECTORY;
-            stats.num_directories++;
-        } else {
-            filetype = OTHER;
-            stats.num_other++;
-        }
+        std::optional<uintmax_t> size = std::nullopt;
+        FileType filetype = inspect_entry(entry, stats, size);
 
         std::string filename = entry.path().filename();
         std::unique_ptr<FileNode> child = std::make_unique<FileNode>(filename, filetype);
