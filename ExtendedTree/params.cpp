@@ -5,13 +5,13 @@
 
 Params parse_cli(int argc, char **argv)
 {
-    Params p;
+    Params params;
+    int option = 0;
 
-    int c = 0;
-    while ((c = getopt(argc, argv, "L:")) != -1) {
-        switch (c) {
+    while ((option = getopt(argc, argv, "L:")) != -1) {
+        switch (option) {
             case 'L':
-                p.level = optarg;
+                params.level = optarg;
                 break;
             default:
                 fmt::print(stderr, "Error parsing command line\n");
@@ -20,9 +20,9 @@ Params parse_cli(int argc, char **argv)
     }
 
     for (int i = optind; i < argc; i++) {
-        p.target = std::filesystem::path(argv[i]);
+        params.target = std::filesystem::path(argv[i]);
         break;
     }
 
-    return p;
+    return params;
 }
