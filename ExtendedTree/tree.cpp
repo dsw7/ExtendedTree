@@ -30,6 +30,20 @@ struct Stats {
     uintmax_t total_size = 0;
 };
 
+struct FileNode {
+    FileType filetype = REGULAR_FILE;
+    std::optional<uintmax_t> filesize = std::nullopt;
+    std::string filename;
+    std::vector<std::unique_ptr<FileNode>> children;
+
+    FileNode(const std::string &filename, const FileType filetype, const std::optional<uintmax_t> &filesize)
+    {
+        this->filename = filename;
+        this->filetype = filetype;
+        this->filesize = filesize;
+    }
+};
+
 FileType inspect_entry(const fs::directory_entry &entry, Stats &stats, std::optional<uintmax_t> &size)
 {
     if (entry.is_regular_file()) {
@@ -48,20 +62,6 @@ FileType inspect_entry(const fs::directory_entry &entry, Stats &stats, std::opti
     stats.num_other++;
     return OTHER;
 }
-
-struct FileNode {
-    FileType filetype = REGULAR_FILE;
-    std::optional<uintmax_t> filesize = std::nullopt;
-    std::string filename;
-    std::vector<std::unique_ptr<FileNode>> children;
-
-    FileNode(const std::string &filename, const FileType filetype, const std::optional<uintmax_t> &filesize)
-    {
-        this->filename = filename;
-        this->filetype = filetype;
-        this->filesize = filesize;
-    }
-};
 
 void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stats, int depth = 0)
 {
