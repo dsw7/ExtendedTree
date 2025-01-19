@@ -66,6 +66,7 @@ FileType inspect_entry(const fs::directory_entry &entry, Stats &stats, std::opti
 void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stats, int depth = 0)
 {
     stats.max_depth = ++depth;
+    uintmax_t dir_size = 0;
 
     for (auto const &entry: fs::directory_iterator { dir }) {
         std::optional<uintmax_t> size = std::nullopt;
@@ -76,9 +77,19 @@ void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stat
 
         if (filetype == DIRECTORY) {
             precompute_dir_layout(entry.path().string(), *child, stats, depth);
+
+            if (child->filesize.has_value()) {
+                dir_size += child->filesize.value();
+            }
+        } else if (filetype == REGULAR_FILE && size.has_value()) {
+            dir_size += size.value();
         }
 
         parent.children.push_back(std::move(child));
+    }
+
+    if (parent.filetype == DIRECTORY) {
+        parent.filesize = dir_size;
     }
 }
 
@@ -95,7 +106,7 @@ void print_file(int depth, const std::unique_ptr<FileNode> &node)
             fmt::print("{}{} {}\n", ws[depth], node->filename, node->filesize.value());
             break;
         case DIRECTORY:
-            fmt::print(fg(fmt::terminal_color::bright_blue), "{}{}/\n", ws[depth], node->filename);
+            fmt::print(fg(fmt::terminal_color::bright_blue), "{}{}/ {}\n", ws[depth], node->filename, node->filesize.value());
             break;
         case OTHER:
             fmt::print(fg(fmt::terminal_color::bright_green), "{}{} ?\n", ws[depth], node->filename);

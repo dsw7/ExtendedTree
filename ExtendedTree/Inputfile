@@ -1,0 +1,76 @@
+I have the following C++ struct:
+```cpp
+struct FileNode {
+    FileType filetype = REGULAR_FILE;
+    std::optional<uintmax_t> filesize = std::nullopt;
+    std::string filename;
+    std::vector<std::unique_ptr<FileNode>> children;
+
+    FileNode(const std::string &filename, const FileType filetype, const std::optional<uintmax_t> &filesize)
+    {
+        this->filename = filename;
+        this->filetype = filetype;
+        this->filesize = filesize;
+    }
+};
+```
+And `FileType` is:
+```cpp
+enum FileType {
+    REGULAR_FILE,
+    DIRECTORY,
+    OTHER,
+};
+```
+I populate this struct by recursively traversing a directory:
+```
+void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stats)
+{
+    for (auto const &entry: fs::directory_iterator { dir }) {
+        std::optional<uintmax_t> size = std::nullopt;
+        FileType filetype = inspect_entry(entry, stats, size);
+
+        std::string filename = entry.path().filename();
+        std::unique_ptr<FileNode> child = std::make_unique<FileNode>(filename, filetype, size);
+
+        if (filetype == DIRECTORY) {
+            precompute_dir_layout(entry.path().string(), *child, stats);
+        }
+
+        parent.children.push_back(std::move(child));
+    }
+}
+```
+And the `inspect_entry` function contains:
+```
+FileType inspect_entry(const fs::directory_entry &entry, Stats &stats, std::optional<uintmax_t> &size)
+{
+    if (entry.is_regular_file()) {
+        size = fs::file_size(entry);
+
+        stats.num_files++;
+        stats.total_size += size.value();
+        return REGULAR_FILE;
+    }
+
+    if (entry.is_directory()) {
+        stats.num_directories++;
+        return DIRECTORY;
+    }
+
+    stats.num_other++;
+    return OTHER;
+}
+```
+What's happening here is that for any node that is a file, I am setting FileNode.filesize. How can I modify the
+`precompute_dir_layout` function to also accumulate directory sizes corresponding to child file sizes? For example,
+suppose I build a tree of FileNode objects:
+```
+root->dir_a
+root->dir_a->file_a
+root->dir_a->file_b
+root->dir_b->file_c
+```
+Suppose that `file_a`, `file_b` and `file_c` are all 5 bytes in size. So `dir_a` would have a size of 10 bytes,
+and dir_b would have a size of 5 bytes. `root` would therefore have a size of 15 bytes
+
