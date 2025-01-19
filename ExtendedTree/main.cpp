@@ -1,7 +1,6 @@
 #include "tree.hpp"
 
 #include <filesystem>
-#include <fmt/core.h>
 #include <iostream>
 #include <optional>
 #include <stdexcept>
@@ -29,7 +28,7 @@ Options parse_cli_options(int argc, char **argv)
                 options.level = optarg;
                 break;
             default:
-                fmt::print(stderr, "Error parsing command line\n");
+                std::cerr << "Error parsing command line\n";
                 exit(EXIT_FAILURE);
         }
     }
