@@ -2,6 +2,7 @@
 
 #include "utils.hpp"
 
+#include <cmath>
 #include <fmt/color.h>
 #include <fmt/core.h>
 #include <map>
@@ -10,6 +11,7 @@ namespace {
 
 constexpr fmt::terminal_color blue = fmt::terminal_color::bright_blue;
 constexpr fmt::terminal_color green = fmt::terminal_color::bright_green;
+constexpr fmt::terminal_color cyan = fmt::terminal_color::bright_cyan;
 
 std::map<int, std::string> ws;
 
@@ -57,18 +59,14 @@ void FileNode::print(int depth, int total_size)
 {
     cache_whitespace(depth);
 
-    float relative_usage = 0;
-
-    if (this->filetype == REGULAR_FILE || this->filetype == DIRECTORY) {
-        relative_usage = compute_relative_usage(this->filesize.value(), total_size);
-    }
-
     switch (this->filetype) {
         case REGULAR_FILE:
-            fmt::print("{}{} {}\n", ws[depth], this->filename, relative_usage);
+            fmt::print("{}{} ", ws[depth], this->filename);
+            fmt::print(fg(cyan), "[ {}% ]\n", compute_relative_usage(this->filesize.value(), total_size));
             break;
         case DIRECTORY:
-            fmt::print(fg(blue), "{}{}/ {}\n", ws[depth], this->filename, relative_usage);
+            fmt::print(fg(blue), "{}{}/ ", ws[depth], this->filename);
+            fmt::print(fg(cyan), "[ {}% ]\n", compute_relative_usage(this->filesize.value(), total_size));
             break;
         case OTHER:
             fmt::print(fg(green), "{}{} ?\n", ws[depth], this->filename);
