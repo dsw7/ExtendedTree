@@ -30,6 +30,7 @@ include_directories(
 )
 add_executable(
   "etree"
+  "filenode.cpp"
   "main.cpp"
   "params.cpp"
   "tree.cpp"

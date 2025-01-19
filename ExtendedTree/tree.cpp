@@ -1,5 +1,6 @@
 #include "tree.hpp"
 
+#include "filenode.hpp"
 #include "utils.hpp"
 
 #include <filesystem>
@@ -16,32 +17,12 @@ namespace fs = std::filesystem;
 
 namespace {
 
-enum FileType {
-    REGULAR_FILE,
-    DIRECTORY,
-    OTHER,
-};
-
 struct Stats {
     int max_depth = 0;
     int num_directories = 0;
     int num_files = 0;
     int num_other = 0;
     uintmax_t total_size = 0;
-};
-
-struct FileNode {
-    FileType filetype = REGULAR_FILE;
-    std::optional<uintmax_t> filesize = std::nullopt;
-    std::string filename;
-    std::vector<std::unique_ptr<FileNode>> children;
-
-    FileNode(const std::string &filename, const FileType filetype, const std::optional<uintmax_t> &filesize)
-    {
-        this->filename = filename;
-        this->filetype = filetype;
-        this->filesize = filesize;
-    }
 };
 
 FileType inspect_entry(const fs::directory_entry &entry, Stats &stats, std::optional<uintmax_t> &size)
