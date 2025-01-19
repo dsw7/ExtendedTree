@@ -22,6 +22,33 @@ enum FileType {
     OTHER,
 };
 
+struct Stats {
+    int max_depth = 0;
+    int num_directories = 0;
+    int num_files = 0;
+    int num_other = 0;
+    uintmax_t total_size = 0;
+};
+
+FileType inspect_entry(const fs::directory_entry &entry, Stats &stats, std::optional<uintmax_t> &size)
+{
+    if (entry.is_regular_file()) {
+        size = fs::file_size(entry);
+
+        stats.num_files++;
+        stats.total_size += size.value();
+        return REGULAR_FILE;
+    }
+
+    if (entry.is_directory()) {
+        stats.num_directories++;
+        return DIRECTORY;
+    }
+
+    stats.num_other++;
+    return OTHER;
+}
+
 struct FileNode {
     FileType filetype = REGULAR_FILE;
     std::optional<uintmax_t> filesize = std::nullopt;
@@ -36,15 +63,26 @@ struct FileNode {
     }
 };
 
-struct Stats {
-    int max_depth = 0;
-    int num_directories = 0;
-    int num_files = 0;
-    int num_other = 0;
-    uintmax_t total_size = 0;
-};
+void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stats, int depth = 0)
+{
+    stats.max_depth = ++depth;
 
-void print(int depth, const std::unique_ptr<FileNode> &node)
+    for (auto const &entry: fs::directory_iterator { dir }) {
+        std::optional<uintmax_t> size = std::nullopt;
+        FileType filetype = inspect_entry(entry, stats, size);
+
+        std::string filename = entry.path().filename();
+        std::unique_ptr<FileNode> child = std::make_unique<FileNode>(filename, filetype, size);
+
+        if (filetype == DIRECTORY) {
+            precompute_dir_layout(entry.path().string(), *child, stats, depth);
+        }
+
+        parent.children.push_back(std::move(child));
+    }
+}
+
+void print_file(int depth, const std::unique_ptr<FileNode> &node)
 {
     static std::map<int, std::string> ws;
 
@@ -69,49 +107,11 @@ void print(int depth, const std::unique_ptr<FileNode> &node)
 
 void traverse_dir_layout(const std::unique_ptr<FileNode> &node, int depth = 0)
 {
-    print(depth, node);
+    print_file(depth, node);
     depth++;
 
     for (const auto &child: node->children) {
         traverse_dir_layout(child, depth);
-    }
-}
-
-FileType inspect_entry(const fs::directory_entry &entry, Stats &stats, std::optional<uintmax_t> &size)
-{
-    if (entry.is_regular_file()) {
-        size = fs::file_size(entry);
-
-        stats.num_files++;
-        stats.total_size += size.value();
-        return REGULAR_FILE;
-    }
-
-    if (entry.is_directory()) {
-        stats.num_directories++;
-        return DIRECTORY;
-    }
-
-    stats.num_other++;
-    return OTHER;
-}
-
-void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stats, int depth = 0)
-{
-    stats.max_depth = ++depth;
-
-    for (auto const &entry: fs::directory_iterator { dir }) {
-        std::optional<uintmax_t> size = std::nullopt;
-        FileType filetype = inspect_entry(entry, stats, size);
-
-        std::string filename = entry.path().filename();
-        std::unique_ptr<FileNode> child = std::make_unique<FileNode>(filename, filetype, size);
-
-        if (filetype == DIRECTORY) {
-            precompute_dir_layout(entry.path().string(), *child, stats, depth);
-        }
-
-        parent.children.push_back(std::move(child));
     }
 }
 
