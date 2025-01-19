@@ -20,4 +20,5 @@ struct FileNode {
 
     FileNode(const std::string &filename, const FileType filetype, const std::optional<uintmax_t> &filesize);
     void print(int depth);
+    void print(int depth, int total_size);
 };
