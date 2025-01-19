@@ -1,5 +1,10 @@
 #pragma once
 
-#include "params.hpp"
+#include <filesystem>
+#include <optional>
 
-void run_tree(const Params &params);
+struct TreeParams {
+    std::optional<std::filesystem::path> target = std::nullopt;
+};
+
+void run_tree(const TreeParams &params);

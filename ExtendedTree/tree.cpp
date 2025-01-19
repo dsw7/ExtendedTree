@@ -91,7 +91,7 @@ void print_report(const Stats &stats)
 
 } // namespace
 
-void run_tree(const Params &params)
+void run_tree(const TreeParams &params)
 {
     fs::path target;
 
