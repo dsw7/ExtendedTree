@@ -4,6 +4,7 @@
 #include <optional>
 
 struct TreeParams {
+    bool raw = false;
     std::optional<std::filesystem::path> target = std::nullopt;
 };
 

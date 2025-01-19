@@ -71,19 +71,20 @@ void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stat
     }
 }
 
-void traverse_dir_layout(const std::unique_ptr<FileNode> &node, int depth = 0)
+void traverse_dirs_print_raw(const std::unique_ptr<FileNode> &node, int depth = 0)
 {
     node->print(depth);
     depth++;
 
     for (const auto &child: node->children) {
-        traverse_dir_layout(child, depth);
+        traverse_dirs_print_raw(child, depth);
     }
 }
 
 void print_report(const Stats &stats)
 {
-    fmt::print("\nTotal size: {} bytes\n", stats.total_size);
+    fmt::print("\n");
+    fmt::print("Total size: {} bytes\n", stats.total_size);
     fmt::print("Number of directories: {}\n", stats.num_directories);
     fmt::print("Number of files: {}\n", stats.num_files);
     fmt::print("Number of other file-like objects: {}\n", stats.num_other);
@@ -118,7 +119,12 @@ void run_tree(const TreeParams &params)
     precompute_dir_layout(target_s, *root, stats);
 
     print_ruler(stats.max_depth, true);
-    traverse_dir_layout(root);
+
+    if (params.raw) {
+        traverse_dirs_print_raw(root);
+    } else {
+    }
+
     print_ruler(stats.max_depth, false);
 
     print_report(stats);

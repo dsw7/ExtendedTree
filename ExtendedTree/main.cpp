@@ -46,7 +46,7 @@ int main(int argc, char **argv)
     const Options options = parse_cli_options(argc, argv);
 
     try {
-        run_tree({ options.target });
+        run_tree({ options.raw, options.target });
     } catch (const std::filesystem::filesystem_error &e) {
         std::cerr << "Error: " << e.what() << '\n';
         return EXIT_FAILURE;
