@@ -6,6 +6,13 @@
 #include <fmt/core.h>
 #include <map>
 
+namespace {
+
+constexpr fmt::terminal_color blue = fmt::terminal_color::bright_blue;
+constexpr fmt::terminal_color green = fmt::terminal_color::bright_green;
+
+} // namespace
+
 FileNode::FileNode(const std::string &filename, const FileType filetype, const std::optional<uintmax_t> &filesize)
 {
     this->filename = filename;
@@ -26,12 +33,12 @@ void FileNode::print(int depth)
             fmt::print("{}{} {}\n", ws[depth], this->filename, this->filesize.value());
             break;
         case DIRECTORY:
-            fmt::print(fg(fmt::terminal_color::bright_blue), "{}{}/ {}\n", ws[depth], this->filename, this->filesize.value());
+            fmt::print(fg(blue), "{}{}/ {}\n", ws[depth], this->filename, this->filesize.value());
             break;
         case OTHER:
-            fmt::print(fg(fmt::terminal_color::bright_green), "{}{} ?\n", ws[depth], this->filename);
+            fmt::print(fg(green), "{}{} ?\n", ws[depth], this->filename);
             break;
         default:
-            fmt::print(fg(fmt::terminal_color::bright_green), "{}{} ?\n", ws[depth], this->filename);
+            fmt::print(fg(green), "{}{} ?\n", ws[depth], this->filename);
     }
 }
