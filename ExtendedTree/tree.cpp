@@ -4,14 +4,11 @@
 #include "utils.hpp"
 
 #include <filesystem>
-#include <fmt/color.h>
 #include <fmt/core.h>
-#include <map>
 #include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string>
-#include <vector>
 
 namespace fs = std::filesystem;
 
@@ -74,32 +71,9 @@ void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stat
     }
 }
 
-void print_file(int depth, const std::unique_ptr<FileNode> &node)
-{
-    static std::map<int, std::string> ws;
-
-    if (!ws.contains(depth)) {
-        ws.emplace(depth, std::string(depth * TAB_WIDTH, ' '));
-    }
-
-    switch (node->filetype) {
-        case REGULAR_FILE:
-            fmt::print("{}{} {}\n", ws[depth], node->filename, node->filesize.value());
-            break;
-        case DIRECTORY:
-            fmt::print(fg(fmt::terminal_color::bright_blue), "{}{}/ {}\n", ws[depth], node->filename, node->filesize.value());
-            break;
-        case OTHER:
-            fmt::print(fg(fmt::terminal_color::bright_green), "{}{} ?\n", ws[depth], node->filename);
-            break;
-        default:
-            fmt::print(fg(fmt::terminal_color::bright_green), "{}{} ?\n", ws[depth], node->filename);
-    }
-}
-
 void traverse_dir_layout(const std::unique_ptr<FileNode> &node, int depth = 0)
 {
-    print_file(depth, node);
+    node->print(depth);
     depth++;
 
     for (const auto &child: node->children) {
