@@ -5,6 +5,7 @@
 
 struct TreeParams {
     bool print_absolute = false;
+    bool print_dirs_only = false;
     std::optional<std::filesystem::path> target = std::nullopt;
 };
 

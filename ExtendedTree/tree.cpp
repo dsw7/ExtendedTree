@@ -91,6 +91,26 @@ void traverse_dirs_print_absolute(const std::unique_ptr<FileNode> &node, int dep
     }
 }
 
+void traverse_dirs_print_relative_dirs(const std::unique_ptr<FileNode> &node, int total_size, int depth = 0)
+{
+    node->print_dirs_only(depth, total_size);
+    depth++;
+
+    for (const auto &child: node->children) {
+        traverse_dirs_print_relative_dirs(child, total_size, depth);
+    }
+}
+
+void traverse_dirs_print_absolute_dirs(const std::unique_ptr<FileNode> &node, int depth = 0)
+{
+    node->print_dirs_only(depth);
+    depth++;
+
+    for (const auto &child: node->children) {
+        traverse_dirs_print_absolute_dirs(child, depth);
+    }
+}
+
 void print_report(const Stats &stats)
 {
     fmt::print("\n");
@@ -131,9 +151,17 @@ void run_tree(const TreeParams &params)
     print_ruler(stats.max_depth, true);
 
     if (params.print_absolute) {
-        traverse_dirs_print_absolute(root);
+        if (params.print_dirs_only) {
+            traverse_dirs_print_absolute_dirs(root);
+        } else {
+            traverse_dirs_print_absolute(root);
+        }
     } else {
-        traverse_dirs_print_relative(root, stats.total_size);
+        if (params.print_dirs_only) {
+            traverse_dirs_print_relative_dirs(root, stats.total_size);
+        } else {
+            traverse_dirs_print_relative(root, stats.total_size);
+        }
     }
 
     print_ruler(stats.max_depth, false);
