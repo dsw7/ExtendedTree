@@ -22,9 +22,10 @@ void cache_whitespace(int depth)
     }
 }
 
-float compute_relative_usage(int size, int total_size)
+void print_relative_usage(int size, int total_size)
 {
-    return ((float)size / total_size) * 100;
+    float relative_size = ((float)size / total_size) * 100;
+    fmt::print(fg(green), "[ {:.{}f}% ]", relative_size, 2);
 }
 
 } // namespace
@@ -62,11 +63,13 @@ void FileNode::print(int depth, int total_size)
     switch (this->filetype) {
         case REGULAR_FILE:
             fmt::print("{}{} ", ws[depth], this->filename);
-            fmt::print(fg(green), "[ {}% ]\n", compute_relative_usage(this->filesize.value(), total_size));
+            print_relative_usage(this->filesize.value(), total_size);
+            fmt::print("\n");
             break;
         case DIRECTORY:
             fmt::print(fg(blue), "{}{}/ ", ws[depth], this->filename);
-            fmt::print(fg(green), "[ {}% ]\n", compute_relative_usage(this->filesize.value(), total_size));
+            print_relative_usage(this->filesize.value(), total_size);
+            fmt::print("\n");
             break;
         case OTHER:
             fmt::print(fg(cyan), "{}{} ?\n", ws[depth], this->filename);
