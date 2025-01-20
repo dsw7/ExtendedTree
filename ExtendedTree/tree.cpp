@@ -7,8 +7,6 @@
 #include <fmt/core.h>
 #include <memory>
 #include <optional>
-#include <stdexcept>
-#include <string>
 
 namespace fs = std::filesystem;
 
@@ -124,13 +122,10 @@ void print_report(const Stats &stats)
 
 void run_tree(const TreeParams &params)
 {
-    std::string target = params.target.string();
-    strip_extra_path_delimiter(target);
-
-    auto root = std::make_unique<FileNode>(target, DIRECTORY, std::nullopt);
+    auto root = std::make_unique<FileNode>(params.target, DIRECTORY, std::nullopt);
 
     Stats stats;
-    precompute_dir_layout(target, *root, stats);
+    precompute_dir_layout(params.target, *root, stats);
 
     print_ruler(stats.max_depth, true);
 

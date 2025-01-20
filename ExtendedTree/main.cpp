@@ -1,5 +1,7 @@
 #include "tree.hpp"
 
+#include "utils.hpp"
+
 #include <filesystem>
 #include <fmt/core.h>
 #include <iostream>
@@ -60,7 +62,7 @@ Options parse_cli_options(int argc, char **argv)
     return options;
 }
 
-fs::path sanitize_target(const std::optional<fs::path> &target_from_opts)
+std::string sanitize_target(const std::optional<fs::path> &target_from_opts)
 {
     fs::path target;
 
@@ -78,14 +80,17 @@ fs::path sanitize_target(const std::optional<fs::path> &target_from_opts)
         throw std::runtime_error("Not a valid directory");
     }
 
-    return target;
+    std::string target_str = target.string();
+    strip_extra_path_delimiter(target_str);
+
+    return target_str;
 }
 
 int main(int argc, char **argv)
 {
     const Options options = parse_cli_options(argc, argv);
 
-    fs::path target = sanitize_target(options.target);
+    std::string target = sanitize_target(options.target);
 
     try {
         run_tree({ options.absolute, options.dirs_only, target });

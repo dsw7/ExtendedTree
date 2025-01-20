@@ -1,11 +1,11 @@
 #pragma once
 
-#include <filesystem>
+#include <string>
 
 struct TreeParams {
     bool print_absolute = false;
     bool print_dirs_only = false;
-    std::filesystem::path target;
+    std::string target;
 };
 
 void run_tree(const TreeParams &params);
