@@ -89,8 +89,7 @@ std::string sanitize_target(const std::optional<fs::path> &target_from_opts)
 int main(int argc, char **argv)
 {
     const Options options = parse_cli_options(argc, argv);
-
-    std::string target = sanitize_target(options.target);
+    const std::string target = sanitize_target(options.target);
 
     try {
         run_tree({ options.absolute, options.dirs_only, target });
