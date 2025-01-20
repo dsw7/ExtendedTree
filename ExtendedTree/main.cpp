@@ -8,10 +8,12 @@
 #include <string>
 #include <unistd.h>
 
+namespace fs = std::filesystem;
+
 struct Options {
     bool absolute = false;
     bool dirs_only = false;
-    std::optional<std::filesystem::path> target = std::nullopt;
+    std::optional<fs::path> target = std::nullopt;
     std::optional<std::string> level = std::nullopt;
 };
 
@@ -51,20 +53,43 @@ Options parse_cli_options(int argc, char **argv)
     }
 
     for (int i = optind; i < argc; i++) {
-        options.target = std::filesystem::path(argv[i]);
+        options.target = fs::path(argv[i]);
         break;
     }
 
     return options;
 }
 
+fs::path sanitize_target(const std::optional<fs::path> &target_from_opts)
+{
+    fs::path target;
+
+    if (target_from_opts.has_value()) {
+        target = target_from_opts.value();
+    } else {
+        target = fs::current_path();
+    }
+
+    if (!fs::exists(target)) {
+        throw std::runtime_error("Directory does not exist");
+    }
+
+    if (!fs::is_directory(target)) {
+        throw std::runtime_error("Not a valid directory");
+    }
+
+    return target;
+}
+
 int main(int argc, char **argv)
 {
     const Options options = parse_cli_options(argc, argv);
 
+    fs::path target = sanitize_target(options.target);
+
     try {
-        run_tree({ options.absolute, options.dirs_only, options.target });
-    } catch (const std::filesystem::filesystem_error &e) {
+        run_tree({ options.absolute, options.dirs_only, target });
+    } catch (const fs::filesystem_error &e) {
         std::cerr << "Error: " << e.what() << '\n';
         return EXIT_FAILURE;
     } catch (const std::runtime_error &e) {

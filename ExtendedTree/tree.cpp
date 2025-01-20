@@ -124,29 +124,13 @@ void print_report(const Stats &stats)
 
 void run_tree(const TreeParams &params)
 {
-    fs::path target;
+    std::string target = params.target.string();
+    strip_extra_path_delimiter(target);
 
-    if (params.target.has_value()) {
-        target = params.target.value();
-    } else {
-        target = fs::current_path();
-    }
-
-    std::string target_s = target.string();
-    strip_extra_path_delimiter(target_s);
-
-    if (!fs::exists(target)) {
-        throw std::runtime_error(fmt::format("Directory '{}' does not exist", target_s));
-    }
-
-    if (!fs::is_directory(target)) {
-        throw std::runtime_error(fmt::format("'{}' is not a directory", target_s));
-    }
-
-    auto root = std::make_unique<FileNode>(target_s, DIRECTORY, std::nullopt);
+    auto root = std::make_unique<FileNode>(target, DIRECTORY, std::nullopt);
 
     Stats stats;
-    precompute_dir_layout(target_s, *root, stats);
+    precompute_dir_layout(target, *root, stats);
 
     print_ruler(stats.max_depth, true);
 
