@@ -22,6 +22,11 @@ void cache_whitespace(int depth)
     }
 }
 
+void print_absolute_usage(int size)
+{
+    fmt::print(fg(green), "( {} B )", size);
+}
+
 void print_relative_usage(int size, int total_size)
 {
     float relative_size = ((float)size / total_size) * 100;
@@ -43,10 +48,14 @@ void FileNode::print(int depth)
 
     switch (this->filetype) {
         case REGULAR_FILE:
-            fmt::print("{}{} {}\n", ws[depth], this->filename, this->filesize.value());
+            fmt::print("{}{} ", ws[depth], this->filename);
+            print_absolute_usage(this->filesize.value());
+            fmt::print("\n");
             break;
         case DIRECTORY:
-            fmt::print(fg(blue), "{}{}/ {}\n", ws[depth], this->filename, this->filesize.value());
+            fmt::print(fg(blue), "{}{}/ ", ws[depth], this->filename);
+            print_absolute_usage(this->filesize.value());
+            fmt::print("\n");
             break;
         case OTHER:
             fmt::print(fg(cyan), "{}{} ?\n", ws[depth], this->filename);
