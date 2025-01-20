@@ -27,10 +27,14 @@ void print_absolute_usage(int size)
     fmt::print(fg(green), "( {} B )", size);
 }
 
+inline float get_relative_size(int size, int total_size)
+{
+    return ((float)size / total_size) * 100;
+}
+
 void print_relative_usage(int size, int total_size)
 {
-    float relative_size = ((float)size / total_size) * 100;
-    fmt::print(fg(green), "[ {:.{}f}% ]", relative_size, 2);
+    fmt::print(fg(green), "[ {:.{}f}% ]", get_relative_size(size, total_size), 2);
 }
 
 } // namespace

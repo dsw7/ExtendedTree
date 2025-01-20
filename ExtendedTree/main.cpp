@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 struct Options {
-    bool raw = false;
+    bool absolute = false;
     std::optional<std::filesystem::path> target = std::nullopt;
     std::optional<std::string> level = std::nullopt;
 };
@@ -18,11 +18,11 @@ Options parse_cli_options(int argc, char **argv)
     Options options;
     int option = 0;
 
-    while ((option = getopt(argc, argv, "rL:")) != -1) {
+    while ((option = getopt(argc, argv, "aL:")) != -1) {
 
         switch (option) {
-            case 'r':
-                options.raw = true;
+            case 'a':
+                options.absolute = true;
                 break;
             case 'L':
                 options.level = optarg;
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
     const Options options = parse_cli_options(argc, argv);
 
     try {
-        run_tree({ options.raw, options.target });
+        run_tree({ options.absolute, options.target });
     } catch (const std::filesystem::filesystem_error &e) {
         std::cerr << "Error: " << e.what() << '\n';
         return EXIT_FAILURE;

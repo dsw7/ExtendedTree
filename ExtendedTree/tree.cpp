@@ -81,13 +81,13 @@ void traverse_dirs_print_relative(const std::unique_ptr<FileNode> &node, int tot
     }
 }
 
-void traverse_dirs_print_raw(const std::unique_ptr<FileNode> &node, int depth = 0)
+void traverse_dirs_print_absolute(const std::unique_ptr<FileNode> &node, int depth = 0)
 {
     node->print(depth);
     depth++;
 
     for (const auto &child: node->children) {
-        traverse_dirs_print_raw(child, depth);
+        traverse_dirs_print_absolute(child, depth);
     }
 }
 
@@ -130,8 +130,8 @@ void run_tree(const TreeParams &params)
 
     print_ruler(stats.max_depth, true);
 
-    if (params.raw) {
-        traverse_dirs_print_raw(root);
+    if (params.print_absolute) {
+        traverse_dirs_print_absolute(root);
     } else {
         traverse_dirs_print_relative(root, stats.total_size);
     }
