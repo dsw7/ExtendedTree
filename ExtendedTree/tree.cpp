@@ -109,15 +109,6 @@ void traverse_dirs_print_absolute_dirs(const std::unique_ptr<FileNode> &node, in
     }
 }
 
-void print_report(const Stats &stats)
-{
-    fmt::print("\n");
-    fmt::print("Total size: {} bytes\n", stats.total_size);
-    fmt::print("Number of directories: {}\n", stats.num_directories);
-    fmt::print("Number of files: {}\n", stats.num_files);
-    fmt::print("Number of other file-like objects: {}\n", stats.num_other);
-}
-
 } // namespace
 
 void run_tree(const TreeParams &params)
@@ -129,21 +120,21 @@ void run_tree(const TreeParams &params)
 
     print_ruler(stats.max_depth, true);
 
-    if (params.print_absolute) {
-        if (params.print_dirs_only) {
-            traverse_dirs_print_absolute_dirs(root);
-        } else {
-            traverse_dirs_print_absolute(root);
-        }
+    if (params.print_absolute && params.print_dirs_only) {
+        traverse_dirs_print_absolute_dirs(root);
+    } else if (params.print_absolute && !params.print_dirs_only) {
+        traverse_dirs_print_absolute(root);
+    } else if (!params.print_absolute && params.print_dirs_only) {
+        traverse_dirs_print_relative_dirs(root, stats.total_size);
     } else {
-        if (params.print_dirs_only) {
-            traverse_dirs_print_relative_dirs(root, stats.total_size);
-        } else {
-            traverse_dirs_print_relative(root, stats.total_size);
-        }
+        traverse_dirs_print_relative(root, stats.total_size);
     }
 
     print_ruler(stats.max_depth, false);
 
-    print_report(stats);
+    fmt::print("\n");
+    fmt::print("Total size: {} bytes\n", stats.total_size);
+    fmt::print("Number of directories: {}\n", stats.num_directories);
+    fmt::print("Number of files: {}\n", stats.num_files);
+    fmt::print("Number of other file-like objects: {}\n", stats.num_other);
 }
