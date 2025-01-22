@@ -20,7 +20,7 @@ struct FileNode {
 
     FileNode(const std::string &filename, const FileType filetype, const std::optional<uintmax_t> &filesize);
     void print(int depth);
-    void print(int depth, int total_size);
+    void print(int depth, uintmax_t total_size);
     void print_dirs_only(int depth);
-    void print_dirs_only(int depth, int total_size);
+    void print_dirs_only(int depth, uintmax_t total_size);
 };

@@ -22,17 +22,17 @@ void cache_whitespace(int depth)
     }
 }
 
-void print_absolute_usage(int size)
+void print_absolute_usage(uintmax_t size)
 {
     fmt::print(fg(green), "( {} B )", size);
 }
 
-inline float get_relative_size(int size, int total_size)
+inline float get_relative_size(uintmax_t size, uintmax_t total_size)
 {
     return ((float)size / total_size) * 100;
 }
 
-void print_relative_usage(int size, int total_size)
+void print_relative_usage(uintmax_t size, uintmax_t total_size)
 {
     fmt::print(fg(green), "[ {:.{}f}% ]", get_relative_size(size, total_size), 2);
 }
@@ -69,7 +69,7 @@ void FileNode::print(int depth)
     }
 }
 
-void FileNode::print(int depth, int total_size)
+void FileNode::print(int depth, uintmax_t total_size)
 {
     cache_whitespace(depth);
 
@@ -103,7 +103,7 @@ void FileNode::print_dirs_only(int depth)
     }
 }
 
-void FileNode::print_dirs_only(int depth, int total_size)
+void FileNode::print_dirs_only(int depth, uintmax_t total_size)
 {
     cache_whitespace(depth);
 
