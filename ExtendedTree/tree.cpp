@@ -110,6 +110,27 @@ void traverse_dirs_print_absolute_dirs(const std::unique_ptr<FileNode> &node, in
     }
 }
 
+nlohmann::json traverse_dirs_build_json(const std::unique_ptr<FileNode> &node)
+{
+    nlohmann::json j;
+
+    j["filename"] = node->filename;
+
+    if (node->filesize.has_value()) {
+        j["filesize"] = node->filesize.value();
+    } else {
+        j["filesize"] = nullptr;
+    }
+
+    j["children"] = nlohmann::json::array();
+
+    for (const auto &child: node->children) {
+        j["children"].push_back(traverse_dirs_build_json(child));
+    }
+
+    return j;
+}
+
 } // namespace
 
 void run_tree(const TreeParams &params)
@@ -132,6 +153,9 @@ void run_tree(const TreeParams &params)
     }
 
     print_ruler(stats.max_depth, false);
+
+    nlohmann::json j = traverse_dirs_build_json(root);
+    fmt::print("{}\n", j.dump(2));
 
     fmt::print("\n");
     fmt::print("Total size: {} bytes\n", stats.total_size);
