@@ -19,6 +19,4 @@ struct FileNode {
     std::vector<std::unique_ptr<FileNode>> children;
 
     FileNode(const std::string &filename, const FileType filetype, const std::optional<uintmax_t> &filesize);
-    void print(int depth);
-    void print(int depth, uintmax_t total_size);
 };

@@ -73,7 +73,7 @@ void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stat
 
 void traverse_dirs_print_relative(const std::unique_ptr<FileNode> &node, uintmax_t total_size, int depth = 0)
 {
-    node->print(depth, total_size);
+    reporting::print(node, depth, total_size);
     depth++;
 
     for (const auto &child: node->children) {
@@ -83,7 +83,7 @@ void traverse_dirs_print_relative(const std::unique_ptr<FileNode> &node, uintmax
 
 void traverse_dirs_print_absolute(const std::unique_ptr<FileNode> &node, int depth = 0)
 {
-    node->print(depth);
+    reporting::print(node, depth);
     depth++;
 
     for (const auto &child: node->children) {
