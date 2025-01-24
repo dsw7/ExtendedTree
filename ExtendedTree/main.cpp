@@ -96,9 +96,9 @@ std::string sanitize_target(const std::optional<fs::path> &target_from_opts)
 int main(int argc, char **argv)
 {
     const Options options = parse_cli_options(argc, argv);
-    const std::string target = sanitize_target(options.target);
 
     try {
+        const std::string target = sanitize_target(options.target);
         run_tree({ options.absolute, options.dirs_only, options.print_json, options.indent_level, target });
     } catch (const fs::filesystem_error &e) {
         std::cerr << "Error: " << e.what() << '\n';
