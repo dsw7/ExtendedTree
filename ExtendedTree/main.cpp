@@ -15,6 +15,8 @@ namespace fs = std::filesystem;
 struct Options {
     bool absolute = false;
     bool dirs_only = false;
+    bool print_json = false;
+    int indent_level = -1;
     std::optional<fs::path> target = std::nullopt;
     std::optional<std::string> level = std::nullopt;
 };
@@ -23,9 +25,10 @@ void print_help_messages()
 {
     fmt::print("Usage:\n  etree [OPTION]... DIRECTORY\n\n");
     fmt::print("Options:\n");
-    fmt::print("  -a  {}\n", "Print usage in bytes (as opposed to percentage)");
-    fmt::print("  -d  {}\n", "Print directories only");
-    fmt::print("  -h  {}\n", "Print this help message and exit");
+    fmt::print("  -a   {}\n", "Print usage in bytes (as opposed to percentage)");
+    fmt::print("  -d   {}\n", "Print directories only");
+    fmt::print("  -j n {}\n", "Print output as JSON with indentation n");
+    fmt::print("  -h   {}\n", "Print this help message and exit");
 }
 
 Options parse_cli_options(int argc, char **argv)
@@ -33,7 +36,7 @@ Options parse_cli_options(int argc, char **argv)
     Options options;
     int option = 0;
 
-    while ((option = getopt(argc, argv, "hadL:")) != -1) {
+    while ((option = getopt(argc, argv, "hadj:L:")) != -1) {
 
         switch (option) {
             case 'h':
@@ -44,6 +47,10 @@ Options parse_cli_options(int argc, char **argv)
                 break;
             case 'd':
                 options.dirs_only = true;
+                break;
+            case 'j':
+                options.print_json = true;
+                options.indent_level = atoi(optarg);
                 break;
             case 'L':
                 options.level = optarg;
@@ -92,7 +99,7 @@ int main(int argc, char **argv)
     const std::string target = sanitize_target(options.target);
 
     try {
-        run_tree({ options.absolute, options.dirs_only, target });
+        run_tree({ options.absolute, options.dirs_only, options.print_json, options.indent_level, target });
     } catch (const fs::filesystem_error &e) {
         std::cerr << "Error: " << e.what() << '\n';
         return EXIT_FAILURE;

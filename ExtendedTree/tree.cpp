@@ -140,6 +140,12 @@ void run_tree(const TreeParams &params)
     Stats stats;
     precompute_dir_layout(params.target, *root, stats);
 
+    if (params.print_json) {
+        nlohmann::json json = traverse_dirs_build_json(root);
+        fmt::print("{}\n", json.dump(params.indent_level));
+        return;
+    }
+
     print_ruler(stats.max_depth, true);
 
     if (params.print_absolute && params.print_dirs_only) {
@@ -153,9 +159,6 @@ void run_tree(const TreeParams &params)
     }
 
     print_ruler(stats.max_depth, false);
-
-    nlohmann::json j = traverse_dirs_build_json(root);
-    fmt::print("{}\n", j.dump(2));
 
     fmt::print("\n");
     fmt::print("Total size: {} bytes\n", stats.total_size);
