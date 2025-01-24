@@ -50,7 +50,7 @@ Options parse_cli_options(int argc, char **argv)
                 break;
             case 'j':
                 options.print_json = true;
-                options.indent_level = atoi(optarg);
+                options.indent_level = std::atoi(optarg);
                 break;
             case 'L':
                 options.level = optarg;
