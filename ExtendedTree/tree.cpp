@@ -1,6 +1,7 @@
 #include "tree.hpp"
 
 #include "filenode.hpp"
+#include "reporting.hpp"
 #include "utils.hpp"
 
 #include <filesystem>
@@ -92,7 +93,7 @@ void traverse_dirs_print_absolute(const std::unique_ptr<FileNode> &node, int dep
 
 void traverse_dirs_print_relative_dirs(const std::unique_ptr<FileNode> &node, uintmax_t total_size, int depth = 0)
 {
-    node->print_dirs_only(depth, total_size);
+    reporting::print_dirs_only(node, depth, total_size);
     depth++;
 
     for (const auto &child: node->children) {

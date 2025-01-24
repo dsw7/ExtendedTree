@@ -22,5 +22,4 @@ struct FileNode {
     void print(int depth);
     void print(int depth, uintmax_t total_size);
     void print_dirs_only(int depth);
-    void print_dirs_only(int depth, uintmax_t total_size);
 };
