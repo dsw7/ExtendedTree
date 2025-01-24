@@ -24,6 +24,25 @@ if(NOT fmt_FOUND)
 endif()
 
 # -----------------------------------------------------------------------------------------------------------
+# nlohmann/json.hpp
+
+message(STATUS "Checking for nlohmann/json.hpp")
+
+set(NLOHMANN_JSON_HPP "${CMAKE_SOURCE_DIR}/external/json.hpp")
+
+if(NOT EXISTS ${NLOHMANN_JSON_HPP})
+  message(STATUS "Downloading nlohmann/json.hpp")
+  file(
+    DOWNLOAD
+    "https://raw.githubusercontent.com/nlohmann/json/develop/single_include/nlohmann/json.hpp"
+    ${NLOHMANN_JSON_HPP}
+    SHOW_PROGRESS
+  )
+else()
+  message(STATUS "nlohmann/json.hpp already exists. Skipping download")
+endif()
+
+# -----------------------------------------------------------------------------------------------------------
 
 include_directories(
   "external"

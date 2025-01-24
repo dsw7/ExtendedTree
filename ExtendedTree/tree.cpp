@@ -5,6 +5,7 @@
 
 #include <filesystem>
 #include <fmt/core.h>
+#include <json.hpp>
 #include <memory>
 #include <optional>
 
