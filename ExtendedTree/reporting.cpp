@@ -23,6 +23,11 @@ void cache_whitespace(int depth)
     ws.emplace(depth, std::string(depth * TAB_WIDTH, ' '));
 }
 
+void print_absolute_usage(uintmax_t size)
+{
+    fmt::print(fg(green), "( {} B )", size);
+}
+
 inline float get_relative_size(uintmax_t size, uintmax_t total_size)
 {
     return ((float)size / total_size) * 100;
@@ -36,6 +41,17 @@ void print_relative_usage(uintmax_t size, uintmax_t total_size)
 } // namespace
 
 namespace reporting {
+
+void print_dirs_only(const std::unique_ptr<FileNode> &node, int depth)
+{
+    cache_whitespace(depth);
+
+    if (node->filetype == DIRECTORY) {
+        fmt::print(fg(blue), "{}{}/ ", ws[depth], node->filename);
+        print_absolute_usage(node->filesize.value());
+        fmt::print("\n");
+    }
+}
 
 void print_dirs_only(const std::unique_ptr<FileNode> &node, int depth, uintmax_t total_size)
 {

@@ -91,14 +91,3 @@ void FileNode::print(int depth, uintmax_t total_size)
             fmt::print(fg(cyan), "{}{} ?\n", ws[depth], this->filename);
     }
 }
-
-void FileNode::print_dirs_only(int depth)
-{
-    cache_whitespace(depth);
-
-    if (this->filetype == DIRECTORY) {
-        fmt::print(fg(blue), "{}{}/ ", ws[depth], this->filename);
-        print_absolute_usage(this->filesize.value());
-        fmt::print("\n");
-    }
-}

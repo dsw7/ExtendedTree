@@ -103,7 +103,7 @@ void traverse_dirs_print_relative_dirs(const std::unique_ptr<FileNode> &node, ui
 
 void traverse_dirs_print_absolute_dirs(const std::unique_ptr<FileNode> &node, int depth = 0)
 {
-    node->print_dirs_only(depth);
+    reporting::print_dirs_only(node, depth);
     depth++;
 
     for (const auto &child: node->children) {
