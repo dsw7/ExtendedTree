@@ -26,17 +26,13 @@ void cache_whitespace(int depth)
 
 void print_absolute_usage(uintmax_t size)
 {
-    fmt::print(fg(green), "( {} B )", size);
-}
-
-inline float get_relative_size(uintmax_t size, uintmax_t total_size)
-{
-    return ((float)size / total_size) * 100;
+    fmt::print(fg(green), "( {} B )\n", size);
 }
 
 void print_relative_usage(uintmax_t size, uintmax_t total_size)
 {
-    fmt::print(fg(green), "[ {:.{}f}% ]", get_relative_size(size, total_size), 2);
+    float relative_size = ((float)size / total_size) * 100;
+    fmt::print(fg(green), "[ {:.{}f}% ]\n", relative_size, 2);
 }
 
 } // namespace
@@ -51,12 +47,10 @@ void print(const std::unique_ptr<FileNode> &node, int depth)
         case REGULAR_FILE:
             fmt::print("{}{} ", ws[depth], node->filename);
             print_absolute_usage(node->filesize.value());
-            fmt::print("\n");
             break;
         case DIRECTORY:
             fmt::print(fg(blue), "{}{}/ ", ws[depth], node->filename);
             print_absolute_usage(node->filesize.value());
-            fmt::print("\n");
             break;
         case OTHER:
             fmt::print(fg(cyan), "{}{} ?\n", ws[depth], node->filename);
@@ -74,12 +68,10 @@ void print(const std::unique_ptr<FileNode> &node, int depth, uintmax_t total_siz
         case REGULAR_FILE:
             fmt::print("{}{} ", ws[depth], node->filename);
             print_relative_usage(node->filesize.value(), total_size);
-            fmt::print("\n");
             break;
         case DIRECTORY:
             fmt::print(fg(blue), "{}{}/ ", ws[depth], node->filename);
             print_relative_usage(node->filesize.value(), total_size);
-            fmt::print("\n");
             break;
         case OTHER:
             fmt::print(fg(cyan), "{}{} ?\n", ws[depth], node->filename);
@@ -96,7 +88,6 @@ void print_dirs_only(const std::unique_ptr<FileNode> &node, int depth)
     if (node->filetype == DIRECTORY) {
         fmt::print(fg(blue), "{}{}/ ", ws[depth], node->filename);
         print_absolute_usage(node->filesize.value());
-        fmt::print("\n");
     }
 }
 
@@ -107,7 +98,6 @@ void print_dirs_only(const std::unique_ptr<FileNode> &node, int depth, uintmax_t
     if (node->filetype == DIRECTORY) {
         fmt::print(fg(blue), "{}{}/ ", ws[depth], node->filename);
         print_relative_usage(node->filesize.value(), total_size);
-        fmt::print("\n");
     }
 }
 
