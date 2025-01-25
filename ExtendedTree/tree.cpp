@@ -128,6 +128,10 @@ void run_tree(const TreeParams &params)
 {
     auto root = std::make_unique<FileNode>(params.target);
 
+    if (fs::is_directory(params.target)) {
+        root->set_is_directory();
+    }
+
     Stats stats;
     precompute_dir_layout(params.target, *root, stats);
 
