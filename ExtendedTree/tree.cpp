@@ -48,7 +48,24 @@ void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stat
 
     for (auto const &entry: fs::directory_iterator { dir }) {
         std::optional<uintmax_t> size = std::nullopt;
-        FileType filetype = inspect_entry(entry, stats, size);
+
+
+        if (entry.is_regular_file()) {
+            size = fs::file_size(entry);
+
+            stats.num_files++;
+            stats.total_size += size.value();
+            return REGULAR_FILE;
+        } else if (entry.is_directory()) {
+            stats.num_directories++;
+            return DIRECTORY;
+        } else {
+        stats.num_other++;
+        return OTHER;
+        }
+
+
+
 
         std::string filename = entry.path().filename();
         std::unique_ptr<FileNode> child = std::make_unique<FileNode>(filename, filetype, size);

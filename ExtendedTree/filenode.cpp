@@ -1,38 +1,46 @@
 #include "filenode.hpp"
 
-FileNode::FileNode(const std::string &filename, const FileType filetype, const std::optional<uintmax_t> &filesize)
+FileNode::FileNode(const std::string &filename)
 {
     this->filename = filename;
-    this->filetype = filetype;
+}
+
+void FileNode::set_filesize(const std::optional<uintmax_t> &filesize)
+{
     this->filesize = filesize;
+}
+
+std::optional<uintmax_t> FileNode::get_filesize()
+{
+    return this->filesize;
 }
 
 void FileNode::set_is_file()
 {
-    this->type = REGULAR_FILE;
+    this->filetype = REGULAR_FILE;
 }
 
 void FileNode::set_is_directory()
 {
-    this->type = DIRECTORY;
+    this->filetype = DIRECTORY;
 }
 
 void FileNode::set_is_other()
 {
-    this->type = OTHER;
+    this->filetype = OTHER;
 }
 
 bool FileNode::is_file()
 {
-    return this->type == REGULAR_FILE;
+    return this->filetype == REGULAR_FILE;
 }
 
 bool FileNode::is_directory()
 {
-    return this->type == DIRECTORY;
+    return this->filetype == DIRECTORY;
 }
 
 bool FileNode::is_other()
 {
-    return this->type == OTHER;
+    return this->filetype == OTHER;
 }
