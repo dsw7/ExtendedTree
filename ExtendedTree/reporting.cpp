@@ -43,20 +43,14 @@ void print(const std::unique_ptr<FileNode> &node, int depth)
 {
     cache_whitespace(depth);
 
-    switch (node->filetype) {
-        case REGULAR_FILE:
-            fmt::print("{}{} ", ws[depth], node->filename);
-            print_absolute_usage(node->filesize.value());
-            break;
-        case DIRECTORY:
-            fmt::print(fg(blue), "{}{}/ ", ws[depth], node->filename);
-            print_absolute_usage(node->filesize.value());
-            break;
-        case OTHER:
-            fmt::print(fg(cyan), "{}{} ?\n", ws[depth], node->filename);
-            break;
-        default:
-            fmt::print(fg(cyan), "{}{} ?\n", ws[depth], node->filename);
+    if (node->is_file()) {
+        fmt::print("{}{} ", ws[depth], node->filename);
+        print_absolute_usage(node->get_filesize());
+    } else if (node->is_directory()) {
+        fmt::print(fg(blue), "{}{}/ ", ws[depth], node->filename);
+        print_absolute_usage(node->get_filesize());
+    } else {
+        fmt::print(fg(cyan), "{}{} ?\n", ws[depth], node->filename);
     }
 }
 
@@ -64,20 +58,14 @@ void print(const std::unique_ptr<FileNode> &node, int depth, uintmax_t total_siz
 {
     cache_whitespace(depth);
 
-    switch (node->filetype) {
-        case REGULAR_FILE:
-            fmt::print("{}{} ", ws[depth], node->filename);
-            print_relative_usage(node->filesize.value(), total_size);
-            break;
-        case DIRECTORY:
-            fmt::print(fg(blue), "{}{}/ ", ws[depth], node->filename);
-            print_relative_usage(node->filesize.value(), total_size);
-            break;
-        case OTHER:
-            fmt::print(fg(cyan), "{}{} ?\n", ws[depth], node->filename);
-            break;
-        default:
-            fmt::print(fg(cyan), "{}{} ?\n", ws[depth], node->filename);
+    if (node->is_file()) {
+        fmt::print("{}{} ", ws[depth], node->filename);
+        print_relative_usage(node->get_filesize(), total_size);
+    } else if (node->is_directory()) {
+        fmt::print(fg(blue), "{}{}/ ", ws[depth], node->filename);
+        print_relative_usage(node->get_filesize(), total_size);
+    } else {
+        fmt::print(fg(cyan), "{}{} ?\n", ws[depth], node->filename);
     }
 }
 
@@ -85,9 +73,9 @@ void print_dirs_only(const std::unique_ptr<FileNode> &node, int depth)
 {
     cache_whitespace(depth);
 
-    if (node->filetype == DIRECTORY) {
+    if (node->is_directory()) {
         fmt::print(fg(blue), "{}{}/ ", ws[depth], node->filename);
-        print_absolute_usage(node->filesize.value());
+        print_absolute_usage(node->get_filesize());
     }
 }
 
@@ -95,9 +83,9 @@ void print_dirs_only(const std::unique_ptr<FileNode> &node, int depth, uintmax_t
 {
     cache_whitespace(depth);
 
-    if (node->filetype == DIRECTORY) {
+    if (node->is_directory()) {
         fmt::print(fg(blue), "{}{}/ ", ws[depth], node->filename);
-        print_relative_usage(node->filesize.value(), total_size);
+        print_relative_usage(node->get_filesize(), total_size);
     }
 }
 

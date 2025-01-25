@@ -22,69 +22,41 @@ struct Stats {
     uintmax_t total_size = 0;
 };
 
-FileType inspect_entry(const fs::directory_entry &entry, Stats &stats, std::optional<uintmax_t> &size)
-{
-    if (entry.is_regular_file()) {
-        size = fs::file_size(entry);
-
-        stats.num_files++;
-        stats.total_size += size.value();
-        return REGULAR_FILE;
-    }
-
-    if (entry.is_directory()) {
-        stats.num_directories++;
-        return DIRECTORY;
-    }
-
-    stats.num_other++;
-    return OTHER;
-}
-
 void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stats, int depth = 0)
 {
     stats.max_depth = ++depth;
     uintmax_t dir_size = 0;
 
     for (auto const &entry: fs::directory_iterator { dir }) {
-        std::optional<uintmax_t> size = std::nullopt;
-
+        std::string filename = entry.path().filename();
+        std::unique_ptr<FileNode> child = std::make_unique<FileNode>(filename);
 
         if (entry.is_regular_file()) {
-            size = fs::file_size(entry);
-
+            child->set_is_file();
+            uintmax_t size = fs::file_size(entry);
+            child->set_filesize(size);
+            stats.total_size += size;
             stats.num_files++;
-            stats.total_size += size.value();
-            return REGULAR_FILE;
         } else if (entry.is_directory()) {
+            child->set_is_directory();
             stats.num_directories++;
-            return DIRECTORY;
         } else {
-        stats.num_other++;
-        return OTHER;
+            child->set_is_other();
+            stats.num_other++;
         }
 
-
-
-
-        std::string filename = entry.path().filename();
-        std::unique_ptr<FileNode> child = std::make_unique<FileNode>(filename, filetype, size);
-
-        if (filetype == DIRECTORY) {
+        if (child->is_directory()) {
             precompute_dir_layout(entry.path().string(), *child, stats, depth);
-
-            if (child->filesize.has_value()) {
-                dir_size += child->filesize.value();
-            }
-        } else if (filetype == REGULAR_FILE && size.has_value()) {
-            dir_size += size.value();
+            dir_size += child->get_filesize();
+        } else if (child->is_file()) {
+            dir_size += child->get_filesize();
         }
 
         parent.children.push_back(std::move(child));
     }
 
-    if (parent.filetype == DIRECTORY) {
-        parent.filesize = dir_size;
+    if (parent.is_directory()) {
+        parent.set_filesize(dir_size);
     }
 }
 
@@ -134,8 +106,10 @@ nlohmann::json traverse_dirs_build_json(const std::unique_ptr<FileNode> &node)
 
     j["filename"] = node->filename;
 
-    if (node->filesize.has_value()) {
-        j["filesize"] = node->filesize.value();
+    if (node->is_file()) {
+        j["filesize"] = node->get_filesize();
+    } else if (node->is_directory()) {
+        j["filesize"] = node->get_filesize();
     } else {
         j["filesize"] = nullptr;
     }
@@ -153,7 +127,7 @@ nlohmann::json traverse_dirs_build_json(const std::unique_ptr<FileNode> &node)
 
 void run_tree(const TreeParams &params)
 {
-    auto root = std::make_unique<FileNode>(params.target, DIRECTORY, std::nullopt);
+    auto root = std::make_unique<FileNode>(params.target);
 
     Stats stats;
     precompute_dir_layout(params.target, *root, stats);

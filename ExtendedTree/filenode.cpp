@@ -5,14 +5,14 @@ FileNode::FileNode(const std::string &filename)
     this->filename = filename;
 }
 
-void FileNode::set_filesize(const std::optional<uintmax_t> &filesize)
+void FileNode::set_filesize(uintmax_t filesize)
 {
     this->filesize = filesize;
 }
 
-std::optional<uintmax_t> FileNode::get_filesize()
+uintmax_t FileNode::get_filesize()
 {
-    return this->filesize;
+    return this->filesize.value_or(0);
 }
 
 void FileNode::set_is_file()

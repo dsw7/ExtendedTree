@@ -22,8 +22,8 @@ public:
 
     FileNode(const std::string &filename);
 
-    void set_filesize(const std::optional<uintmax_t> &filesize);
-    std::optional<uintmax_t> get_filesize();
+    void set_filesize(uintmax_t filesize);
+    uintmax_t get_filesize();
     void set_is_file();
     void set_is_directory();
     void set_is_other();
