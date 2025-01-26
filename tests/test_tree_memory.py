@@ -3,7 +3,12 @@ from .base import TestTree, get_path_to_etree_binary
 
 
 def run_valgrind(args: list[str]) -> None:
-    root = ["valgrind", "--error-exitcode=2", "--leak-check=full", get_path_to_etree_binary()]
+    root = [
+        "valgrind",
+        "--error-exitcode=2",
+        "--leak-check=full",
+        get_path_to_etree_binary(),
+    ]
 
     process = run(root + args, stdout=DEVNULL, stderr=PIPE)
     stderr = process.stderr.decode()

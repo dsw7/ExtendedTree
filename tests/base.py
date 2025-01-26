@@ -5,9 +5,11 @@ from shutil import rmtree
 from tempfile import gettempdir
 from unittest import TestCase
 
+
 @cache
 def get_path_to_etree_binary() -> str:
     return environ["PATH_BIN"]
+
 
 def build_test_dir() -> Path:
     test_dir = Path(gettempdir()) / "etree_test"
@@ -39,7 +41,6 @@ class TestTree(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.test_dir: Path = build_test_dir()
-        cls.bin: str = environ["PATH_BIN"]
 
     @classmethod
     def tearDownClass(cls) -> None:

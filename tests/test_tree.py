@@ -1,7 +1,8 @@
 from json import loads
 from typing import TypedDict, TypeAlias, Iterable
-from subprocess import run, PIPE, DEVNULL
-from .base import TestTree
+from subprocess import run, PIPE, CompletedProcess
+from .base import TestTree, get_path_to_etree_binary
+
 
 Layers: TypeAlias = dict[int, list[int]]
 
@@ -10,6 +11,11 @@ class Tree(TypedDict):
     filename: str
     filesize: int
     children: Iterable["Tree"]
+
+
+def run_subprocess(args: list[str]) -> CompletedProcess:
+    command = [get_path_to_etree_binary()] + args
+    return run(command, stdout=PIPE, stderr=PIPE)
 
 
 def traverse_level_order(stdout: Tree, layers: Layers, depth: int = 0) -> None:
@@ -27,49 +33,49 @@ def traverse_level_order(stdout: Tree, layers: Layers, depth: int = 0) -> None:
 class TestCommandLine(TestTree):
 
     def test_help(self) -> None:
-        process = run([self.bin, "-h"], stdout=PIPE)
+        process = run_subprocess(["-h"])
         self.assertEqual(process.returncode, 0)
         self.assertIn("Usage:", process.stdout.decode())
 
     def test_missing_dir(self) -> None:
-        process = run([self.bin, "/foobar"], stderr=PIPE)
+        process = run_subprocess(["/foobar"])
         self.assertEqual(process.returncode, 1)
         self.assertIn("Error: Directory does not exist", process.stderr.decode())
 
     def test_traverse_file(self) -> None:
-        process = run([self.bin, self.test_dir / "foo" / "a.txt"], stderr=PIPE)
+        process = run_subprocess([self.test_dir / "foo" / "a.txt"])
         self.assertEqual(process.returncode, 1)
         self.assertIn("Error: Not a valid directory", process.stderr.decode())
 
     def test_relative(self) -> None:
-        process = run([self.bin, self.test_dir], stdout=DEVNULL)
+        process = run_subprocess([self.test_dir])
         self.assertEqual(process.returncode, 0)
 
     def test_absolute(self) -> None:
-        process = run([self.bin, self.test_dir, "-a"], stdout=DEVNULL)
+        process = run_subprocess([self.test_dir, "-a"])
         self.assertEqual(process.returncode, 0)
 
     def test_json_absolute(self) -> None:
-        process = run([self.bin, self.test_dir, "-a", "-j -1"], stdout=DEVNULL)
+        process = run_subprocess([self.test_dir, "-a", "-j -1"])
         self.assertEqual(process.returncode, 0)
 
     def test_json_relative(self) -> None:
-        process = run([self.bin, self.test_dir, "-j -1"], stdout=DEVNULL)
+        process = run_subprocess([self.test_dir, "-j -1"])
         self.assertEqual(process.returncode, 0)
 
     def test_dirs_only_absolute(self) -> None:
-        process = run([self.bin, self.test_dir, "-da"], stdout=DEVNULL)
+        process = run_subprocess([self.test_dir, "-da"])
         self.assertEqual(process.returncode, 0)
 
     def test_dirs_only_relative(self) -> None:
-        process = run([self.bin, self.test_dir, "-d"], stdout=DEVNULL)
+        process = run_subprocess([self.test_dir, "-d"])
         self.assertEqual(process.returncode, 0)
 
 
 class TestValidReporting(TestTree):
 
     def test_absolute(self) -> None:
-        process = run([self.bin, self.test_dir, "-a", "-j -1"], stdout=PIPE)
+        process = run_subprocess([self.test_dir, "-a", "-j -1"])
         stdout: Tree = loads(process.stdout.decode())
 
         layers: Layers = {}
@@ -80,7 +86,7 @@ class TestValidReporting(TestTree):
         self.assertListEqual(layers[2], [3, 3, 3, 3, 3, 3, 3, 3, 3])
 
     def test_relative(self) -> None:
-        process = run([self.bin, self.test_dir, "-j -1"], stdout=PIPE)
+        process = run_subprocess([self.test_dir, "-j -1"])
         stdout: Tree = loads(process.stdout.decode())
 
         layers: Layers = {}
