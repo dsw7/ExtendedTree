@@ -53,18 +53,20 @@ def traverse_level_order(stdout: Tree, layers: Layers, depth: int = 0) -> None:
         traverse_level_order(child, layers, depth)
 
 
-class TestAbsolute(TestCase):
+class TestTree(TestCase):
 
-    def setUp(self) -> None:
-        self.test_dir: Path = build_test_dir()
-        self.bin: str = environ["PATH_BIN"]
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.test_dir: Path = build_test_dir()
+        cls.bin: str = environ["PATH_BIN"]
 
-    def tearDown(self) -> None:
-        if self.test_dir.exists():
-            rmtree(self.test_dir)
+    @classmethod
+    def tearDownClass(cls) -> None:
+        if cls.test_dir.exists():
+            rmtree(cls.test_dir)
 
-    def test_basic(self) -> None:
-        process = run([self.bin, self.test_dir, "-j -1"], stdout=PIPE)
+    def test_absolute(self) -> None:
+        process = run([self.bin, self.test_dir, "-a", "-j -1"], stdout=PIPE)
         self.assertEqual(process.returncode, 0)
 
         stdout: Tree = loads(process.stdout.decode())
@@ -74,3 +76,21 @@ class TestAbsolute(TestCase):
         self.assertListEqual(layers[0], [27])
         self.assertListEqual(layers[1], [9, 9, 9])
         self.assertListEqual(layers[2], [3, 3, 3, 3, 3, 3, 3, 3, 3])
+
+    def test_relative(self) -> None:
+        process = run([self.bin, self.test_dir, "-j -1"], stdout=PIPE)
+        self.assertEqual(process.returncode, 0)
+
+        stdout: Tree = loads(process.stdout.decode())
+        layers: Layers = {}
+        traverse_level_order(stdout, layers)
+
+        self.assertListEqual(layers[0], [100.0])
+        self.assertEqual(len(layers[1]), 3)
+        self.assertEqual(len(layers[2]), 9)
+
+        for i in range(3):
+            self.assertAlmostEqual(layers[1][i], 33.3333, places=4)
+
+        for i in range(9):
+            self.assertAlmostEqual(layers[2][i], 11.1111, places=4)

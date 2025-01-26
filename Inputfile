@@ -1,0 +1,24 @@
+I have the following python3 unittest test class:
+```
+class TestAbsolute(TestCase):
+
+    def setUp(self) -> None:
+        self.test_dir: Path = build_test_dir()
+        self.bin: str = environ["PATH_BIN"]
+
+    def tearDown(self) -> None:
+        if self.test_dir.exists():
+            rmtree(self.test_dir)
+
+    def test_basic(self) -> None:
+        process = run([self.bin, self.test_dir, "-j -1"], stdout=PIPE)
+        self.assertEqual(process.returncode, 0)
+
+        stdout: Tree = loads(process.stdout.decode())
+        layers: Layers = {}
+        traverse_level_order(stdout, layers)
+
+        self.assertListEqual(layers[0], [27])
+```
+How can I switch the setUp and tearDown functions to be called once per class invocation as opposed to once
+for every test_* function call?
