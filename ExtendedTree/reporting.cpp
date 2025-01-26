@@ -31,7 +31,7 @@ void print_absolute_usage(uintmax_t size)
 
 void print_relative_usage(uintmax_t size, uintmax_t total_size)
 {
-    float relative_size = ((float)size / total_size) * 100;
+    float relative_size = compute_relative_usage(size, total_size);
     fmt::print(fg(green), "[ {:.{}f}% ]\n", relative_size, 2);
 }
 
