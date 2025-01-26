@@ -1,9 +1,13 @@
+from functools import cache
 from os import environ
 from pathlib import Path
 from shutil import rmtree
 from tempfile import gettempdir
 from unittest import TestCase
 
+@cache
+def get_path_to_etree_binary() -> str:
+    return environ["PATH_BIN"]
 
 def build_test_dir() -> Path:
     test_dir = Path(gettempdir()) / "etree_test"
