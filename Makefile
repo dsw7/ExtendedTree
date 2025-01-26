@@ -34,4 +34,4 @@ lint:
 
 test: export PATH_BIN = $(CURDIR)/build/etree
 test: compile
-	@python3 -m unittest -v tests/test_tree.py
+	@python3 -m unittest -v tests/test*.py
