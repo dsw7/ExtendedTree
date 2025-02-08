@@ -1,27 +1,19 @@
 #include "tree.hpp"
 
+#include "params.hpp"
 #include "utils.hpp"
 
 #include <filesystem>
 #include <fmt/core.h>
 #include <iostream>
 #include <optional>
-#include <set>
 #include <stdexcept>
 #include <string>
 #include <unistd.h>
 
-namespace fs = std::filesystem;
+TreeParams params;
 
-struct Options {
-    bool absolute = false;
-    bool dirs_only = false;
-    bool print_json = false;
-    int indent_level = -1;
-    std::optional<fs::path> target = std::nullopt;
-    std::optional<std::string> level = std::nullopt;
-    std::set<std::string> excludes;
-};
+namespace fs = std::filesystem;
 
 void print_help_messages()
 {
@@ -32,47 +24,6 @@ void print_help_messages()
     fmt::print("  -j n {}\n", "Print output as JSON with indentation n");
     fmt::print("  -I   {}\n", "Exclude one or more files or directories");
     fmt::print("  -h   {}\n", "Print this help message and exit");
-}
-
-Options parse_cli_options(int argc, char **argv)
-{
-    Options options;
-    int option = 0;
-
-    while ((option = getopt(argc, argv, "hadj:L:I:")) != -1) {
-
-        switch (option) {
-            case 'h':
-                print_help_messages();
-                exit(EXIT_SUCCESS);
-            case 'a':
-                options.absolute = true;
-                break;
-            case 'd':
-                options.dirs_only = true;
-                break;
-            case 'j':
-                options.print_json = true;
-                options.indent_level = std::atoi(optarg);
-                break;
-            case 'L':
-                options.level = optarg;
-                break;
-            case 'I':
-                options.excludes.insert(optarg);
-                break;
-            default:
-                print_help_messages();
-                exit(EXIT_FAILURE);
-        }
-    }
-
-    for (int i = optind; i < argc; i++) {
-        options.target = fs::path(argv[i]);
-        break;
-    }
-
-    return options;
 }
 
 std::string sanitize_target(const std::optional<fs::path> &target_from_opts)
@@ -99,13 +50,50 @@ std::string sanitize_target(const std::optional<fs::path> &target_from_opts)
     return target_str;
 }
 
+void parse_cli_options(int argc, char **argv)
+{
+    int option = 0;
+
+    while ((option = getopt(argc, argv, "hadj:I:")) != -1) {
+        switch (option) {
+            case 'h':
+                print_help_messages();
+                exit(EXIT_SUCCESS);
+            case 'a':
+                params.print_absolute = true;
+                break;
+            case 'd':
+                params.print_dirs_only = true;
+                break;
+            case 'j':
+                params.print_json = true;
+                params.indent_level = std::atoi(optarg);
+                break;
+            case 'I':
+                params.excludes.insert(optarg);
+                break;
+            default:
+                print_help_messages();
+                exit(EXIT_FAILURE);
+        }
+    }
+
+    std::optional<std::string> target = std::nullopt;
+
+    for (int i = optind; i < argc; i++) {
+        target = fs::path(argv[i]);
+        break;
+    }
+
+    params.target = sanitize_target(target);
+}
+
 int main(int argc, char **argv)
 {
-    const Options options = parse_cli_options(argc, argv);
 
     try {
-        const std::string target = sanitize_target(options.target);
-        run_tree({ options.absolute, options.dirs_only, options.print_json, options.indent_level, options.excludes, target });
+        parse_cli_options(argc, argv);
+        run_tree();
     } catch (const fs::filesystem_error &e) {
         std::cerr << "Error: " << e.what() << '\n';
         return EXIT_FAILURE;

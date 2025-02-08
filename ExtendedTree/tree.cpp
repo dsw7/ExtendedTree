@@ -1,6 +1,7 @@
 #include "tree.hpp"
 
 #include "filenode.hpp"
+#include "params.hpp"
 #include "reporting.hpp"
 #include "utils.hpp"
 
@@ -147,7 +148,7 @@ nlohmann::json traverse_dirs_build_json(const std::unique_ptr<FileNode> &node, u
 
 } // namespace
 
-void run_tree(const TreeParams &params)
+void run_tree()
 {
     auto root = std::make_unique<FileNode>(params.target);
 
