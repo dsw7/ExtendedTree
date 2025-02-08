@@ -6,10 +6,10 @@
 #include <fmt/core.h>
 #include <iostream>
 #include <optional>
+#include <set>
 #include <stdexcept>
 #include <string>
 #include <unistd.h>
-#include <vector>
 
 namespace fs = std::filesystem;
 
@@ -20,7 +20,7 @@ struct Options {
     int indent_level = -1;
     std::optional<fs::path> target = std::nullopt;
     std::optional<std::string> level = std::nullopt;
-    std::vector<std::string> excludes;
+    std::set<std::string> excludes;
 };
 
 void print_help_messages()
@@ -59,7 +59,7 @@ Options parse_cli_options(int argc, char **argv)
                 options.level = optarg;
                 break;
             case 'I':
-                options.excludes.push_back(optarg);
+                options.excludes.insert(optarg);
                 break;
             default:
                 print_help_messages();
