@@ -27,6 +27,11 @@ void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stat
 
     for (auto const &entry: fs::directory_iterator { dir }) {
         std::string filename = entry.path().filename();
+
+        if (params.excludes.contains(filename)) {
+            continue;
+        }
+
         std::unique_ptr<FileNode> child = std::make_unique<FileNode>(filename);
 
         if (entry.is_regular_file()) {
