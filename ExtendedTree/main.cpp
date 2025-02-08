@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <string>
 #include <unistd.h>
+#include <vector>
 
 namespace fs = std::filesystem;
 
@@ -19,6 +20,7 @@ struct Options {
     int indent_level = -1;
     std::optional<fs::path> target = std::nullopt;
     std::optional<std::string> level = std::nullopt;
+    std::vector<std::string> excludes;
 };
 
 void print_help_messages()
@@ -28,6 +30,7 @@ void print_help_messages()
     fmt::print("  -a   {}\n", "Print usage in bytes (as opposed to percentage)");
     fmt::print("  -d   {}\n", "Print directories only");
     fmt::print("  -j n {}\n", "Print output as JSON with indentation n");
+    fmt::print("  -I   {}\n", "Exclude one or more files or directories");
     fmt::print("  -h   {}\n", "Print this help message and exit");
 }
 
@@ -36,7 +39,7 @@ Options parse_cli_options(int argc, char **argv)
     Options options;
     int option = 0;
 
-    while ((option = getopt(argc, argv, "hadj:L:")) != -1) {
+    while ((option = getopt(argc, argv, "hadj:L:I:")) != -1) {
 
         switch (option) {
             case 'h':
@@ -54,6 +57,9 @@ Options parse_cli_options(int argc, char **argv)
                 break;
             case 'L':
                 options.level = optarg;
+                break;
+            case 'I':
+                options.excludes.push_back(optarg);
                 break;
             default:
                 print_help_messages();
