@@ -101,3 +101,31 @@ class TestValidReporting(TestTree):
 
         for i in range(9):
             self.assertAlmostEqual(layers[2][i], 11.1111, places=4)
+
+    def test_absolute_exclude(self) -> None:
+        process = run_subprocess([self.test_dir, "-a", "-j -1", "-Ifoo"])
+        stdout: Tree = loads(process.stdout.decode())
+
+        layers: Layers = {}
+        traverse_level_order(stdout, layers)
+
+        self.assertListEqual(layers[0], [18])
+        self.assertListEqual(layers[1], [9, 9])
+        self.assertListEqual(layers[2], [3, 3, 3, 3, 3, 3])
+
+    def test_relative_exclude(self) -> None:
+        process = run_subprocess([self.test_dir, "-j -1", "-Ifoo"])
+        stdout: Tree = loads(process.stdout.decode())
+
+        layers: Layers = {}
+        traverse_level_order(stdout, layers)
+
+        self.assertListEqual(layers[0], [100.0])
+        self.assertEqual(len(layers[1]), 2)
+        self.assertEqual(len(layers[2]), 6)
+
+        for i in range(2):
+            self.assertAlmostEqual(layers[1][i], 50., places=4)
+
+        for i in range(6):
+            self.assertAlmostEqual(layers[2][i], 16.6667, places=4)
