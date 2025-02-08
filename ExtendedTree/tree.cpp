@@ -172,8 +172,6 @@ void run_tree()
         return;
     }
 
-    print_ruler(stats.max_depth, true);
-
     if (params.print_absolute && params.print_dirs_only) {
         traverse_dirs_print_absolute_dirs(root);
     } else if (params.print_absolute && !params.print_dirs_only) {
@@ -183,8 +181,6 @@ void run_tree()
     } else {
         traverse_dirs_print_relative(root, stats.total_size);
     }
-
-    print_ruler(stats.max_depth, false);
 
     fmt::print("\n");
     fmt::print("Total size: {} bytes\n", stats.total_size);
