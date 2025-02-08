@@ -15,7 +15,6 @@ namespace fs = std::filesystem;
 namespace {
 
 struct Stats {
-    int max_depth = 0;
     int num_directories = 0;
     int num_files = 0;
     int num_other = 0;
@@ -24,7 +23,6 @@ struct Stats {
 
 void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stats, int depth = 0)
 {
-    stats.max_depth = ++depth;
     uintmax_t dir_size = 0;
 
     for (auto const &entry: fs::directory_iterator { dir }) {
