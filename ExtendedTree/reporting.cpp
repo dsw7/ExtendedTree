@@ -9,7 +9,7 @@
 
 namespace {
 
-std::map<int, std::string> ws;
+std::map<int, std::string> WHITESPACE;
 
 constexpr fmt::terminal_color blue = fmt::terminal_color::bright_blue;
 constexpr fmt::terminal_color cyan = fmt::terminal_color::bright_cyan;
@@ -17,26 +17,26 @@ constexpr fmt::terminal_color green = fmt::terminal_color::bright_green;
 
 void cache_whitespace(int depth)
 {
-    if (ws.contains(depth)) {
+    if (WHITESPACE.contains(depth)) {
         return;
     }
 
-    ws.emplace(depth, std::string(depth * TAB_WIDTH, ' '));
+    WHITESPACE.emplace(depth, std::string(depth * TAB_WIDTH, ' '));
 }
 
 void print_file(const std::string &filename, int depth)
 {
-    fmt::print("{}{} ", ws[depth], filename);
+    fmt::print("{}{} ", WHITESPACE[depth], filename);
 }
 
 void print_directory(const std::string &filename, int depth)
 {
-    fmt::print(fg(blue), "{}{}/ ", ws[depth], filename);
+    fmt::print(fg(blue), "{}{}/ ", WHITESPACE[depth], filename);
 }
 
 void print_other(const std::string &filename, int depth)
 {
-    fmt::print(fg(cyan), "{}{} ?\n", ws[depth], filename);
+    fmt::print(fg(cyan), "{}{} ?\n", WHITESPACE[depth], filename);
 }
 
 void print_absolute_usage(uintmax_t size)
