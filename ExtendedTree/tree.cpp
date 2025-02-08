@@ -2,12 +2,12 @@
 
 #include "filenode.hpp"
 #include "params.hpp"
+#include "report_json.hpp"
 #include "reporting.hpp"
 #include "utils.hpp"
 
 #include <filesystem>
 #include <fmt/core.h>
-#include <json.hpp>
 #include <memory>
 
 namespace fs = std::filesystem;
@@ -100,52 +100,6 @@ void traverse_dirs_print_absolute_dirs(const std::unique_ptr<FileNode> &node, in
     }
 }
 
-nlohmann::json traverse_dirs_build_json(const std::unique_ptr<FileNode> &node)
-{
-    nlohmann::json j;
-
-    j["filename"] = node->filename;
-
-    if (node->is_file()) {
-        j["filesize"] = node->get_filesize();
-    } else if (node->is_directory()) {
-        j["filesize"] = node->get_filesize();
-    } else {
-        j["filesize"] = nullptr;
-    }
-
-    j["children"] = nlohmann::json::array();
-
-    for (const auto &child: node->children) {
-        j["children"].push_back(traverse_dirs_build_json(child));
-    }
-
-    return j;
-}
-
-nlohmann::json traverse_dirs_build_json(const std::unique_ptr<FileNode> &node, uintmax_t total_size)
-{
-    nlohmann::json j;
-
-    j["filename"] = node->filename;
-
-    if (node->is_file()) {
-        j["filesize"] = compute_relative_usage(node->get_filesize(), total_size);
-    } else if (node->is_directory()) {
-        j["filesize"] = compute_relative_usage(node->get_filesize(), total_size);
-    } else {
-        j["filesize"] = nullptr;
-    }
-
-    j["children"] = nlohmann::json::array();
-
-    for (const auto &child: node->children) {
-        j["children"].push_back(traverse_dirs_build_json(child, total_size));
-    }
-
-    return j;
-}
-
 } // namespace
 
 void run_tree()
@@ -160,15 +114,11 @@ void run_tree()
     precompute_dir_layout(params.target, *root, stats);
 
     if (params.print_json) {
-        nlohmann::json json;
-
         if (params.print_absolute) {
-            json = traverse_dirs_build_json(root);
+            reporting::print_json(root);
         } else {
-            json = traverse_dirs_build_json(root, stats.total_size);
+            reporting::print_json(root, stats.total_size);
         }
-
-        fmt::print("{}\n", json.dump(params.indent_level));
         return;
     }
 

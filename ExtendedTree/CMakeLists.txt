@@ -51,6 +51,7 @@ add_executable(
   "etree"
   "filenode.cpp"
   "main.cpp"
+  "report_json.cpp"
   "reporting.cpp"
   "tree.cpp"
   "utils.cpp"
