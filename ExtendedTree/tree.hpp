@@ -1,5 +1,6 @@
 #pragma once
 
+#include <set>
 #include <string>
 
 struct TreeParams {
@@ -7,6 +8,7 @@ struct TreeParams {
     bool print_dirs_only = false;
     bool print_json = false;
     int indent_level = -1;
+    std::set<std::string> excludes;
     std::string target;
 };
 

@@ -105,7 +105,7 @@ int main(int argc, char **argv)
 
     try {
         const std::string target = sanitize_target(options.target);
-        run_tree({ options.absolute, options.dirs_only, options.print_json, options.indent_level, target });
+        run_tree({ options.absolute, options.dirs_only, options.print_json, options.indent_level, options.excludes, target });
     } catch (const fs::filesystem_error &e) {
         std::cerr << "Error: " << e.what() << '\n';
         return EXIT_FAILURE;
