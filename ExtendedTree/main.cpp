@@ -90,7 +90,6 @@ void parse_cli_options(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-
     try {
         parse_cli_options(argc, argv);
         run_tree();
