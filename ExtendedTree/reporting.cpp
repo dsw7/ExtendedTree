@@ -24,6 +24,21 @@ void cache_whitespace(int depth)
     ws.emplace(depth, std::string(depth * TAB_WIDTH, ' '));
 }
 
+void print_file(const std::string &filename, int depth)
+{
+    fmt::print("{}{} ", ws[depth], filename);
+}
+
+void print_directory(const std::string &filename, int depth)
+{
+    fmt::print(fg(blue), "{}{}/ ", ws[depth], filename);
+}
+
+void print_other(const std::string &filename, int depth)
+{
+    fmt::print(fg(cyan), "{}{} ?\n", ws[depth], filename);
+}
+
 void print_absolute_usage(uintmax_t size)
 {
     fmt::print(fg(green), "( {} B )\n", size);
@@ -44,13 +59,13 @@ void print(const std::unique_ptr<FileNode> &node, int depth)
     cache_whitespace(depth);
 
     if (node->is_file()) {
-        fmt::print("{}{} ", ws[depth], node->filename);
+        print_file(node->filename, depth);
         print_absolute_usage(node->get_filesize());
     } else if (node->is_directory()) {
-        fmt::print(fg(blue), "{}{}/ ", ws[depth], node->filename);
+        print_directory(node->filename, depth);
         print_absolute_usage(node->get_filesize());
     } else {
-        fmt::print(fg(cyan), "{}{} ?\n", ws[depth], node->filename);
+        print_other(node->filename, depth);
     }
 }
 
@@ -59,13 +74,13 @@ void print(const std::unique_ptr<FileNode> &node, int depth, uintmax_t total_siz
     cache_whitespace(depth);
 
     if (node->is_file()) {
-        fmt::print("{}{} ", ws[depth], node->filename);
+        print_file(node->filename, depth);
         print_relative_usage(node->get_filesize(), total_size);
     } else if (node->is_directory()) {
-        fmt::print(fg(blue), "{}{}/ ", ws[depth], node->filename);
+        print_directory(node->filename, depth);
         print_relative_usage(node->get_filesize(), total_size);
     } else {
-        fmt::print(fg(cyan), "{}{} ?\n", ws[depth], node->filename);
+        print_other(node->filename, depth);
     }
 }
 
@@ -74,7 +89,7 @@ void print_dirs_only(const std::unique_ptr<FileNode> &node, int depth)
     cache_whitespace(depth);
 
     if (node->is_directory()) {
-        fmt::print(fg(blue), "{}{}/ ", ws[depth], node->filename);
+        print_directory(node->filename, depth);
         print_absolute_usage(node->get_filesize());
     }
 }
@@ -84,7 +99,7 @@ void print_dirs_only(const std::unique_ptr<FileNode> &node, int depth, uintmax_t
     cache_whitespace(depth);
 
     if (node->is_directory()) {
-        fmt::print(fg(blue), "{}{}/ ", ws[depth], node->filename);
+        print_directory(node->filename, depth);
         print_relative_usage(node->get_filesize(), total_size);
     }
 }
