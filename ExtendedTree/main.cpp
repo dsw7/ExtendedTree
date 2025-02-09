@@ -19,11 +19,12 @@ void print_help_messages()
 {
     fmt::print("Usage:\n  etree [OPTION]... DIRECTORY\n\n");
     fmt::print("Options:\n");
-    fmt::print("  -a   {}\n", "Print usage in bytes (as opposed to percentage)");
-    fmt::print("  -d   {}\n", "Print directories only");
-    fmt::print("  -j n {}\n", "Print output as JSON with indentation n");
-    fmt::print("  -I   {}\n", "Exclude one or more files or directories");
-    fmt::print("  -h   {}\n", "Print this help message and exit");
+    fmt::print("  -a         {}\n", "Print usage in bytes (as opposed to percentage)");
+    fmt::print("  -d         {}\n", "Print directories only");
+    fmt::print("  -j <level> {}\n", "Print output as JSON with indentation <level>");
+    fmt::print("  -I         {}\n", "Exclude one or more files or directories");
+    fmt::print("  -L <level> {}\n", "Descend <level> directories deep");
+    fmt::print("  -h         {}\n", "Print this help message and exit");
 }
 
 std::string sanitize_target(const std::optional<fs::path> &target_from_opts)
