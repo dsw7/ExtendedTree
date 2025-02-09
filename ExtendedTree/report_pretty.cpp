@@ -1,5 +1,6 @@
 #include "report_pretty.hpp"
 
+#include "params.hpp"
 #include "utils.hpp"
 
 #include <fmt/color.h>
@@ -14,6 +15,19 @@ std::map<int, std::string> WHITESPACE;
 constexpr fmt::terminal_color blue = fmt::terminal_color::bright_blue;
 constexpr fmt::terminal_color cyan = fmt::terminal_color::bright_cyan;
 constexpr fmt::terminal_color green = fmt::terminal_color::bright_green;
+
+bool skip_level(int depth)
+{
+    if (params.level < 1) {
+        return false;
+    }
+
+    if (params.level == depth - 1) {
+        return true;
+    }
+
+    return false;
+}
 
 void cache_whitespace(int depth)
 {
@@ -110,6 +124,9 @@ void print_relative(const std::unique_ptr<FileNode> &node, uintmax_t total_size,
     depth++;
 
     for (const auto &child: node->children) {
+        if (skip_level(depth)) {
+            continue;
+        }
         print_relative(child, total_size, depth);
     }
 }
@@ -120,6 +137,9 @@ void print_absolute(const std::unique_ptr<FileNode> &node, int depth)
     depth++;
 
     for (const auto &child: node->children) {
+        if (skip_level(depth)) {
+            continue;
+        }
         print_absolute(child, depth);
     }
 }
@@ -130,6 +150,9 @@ void print_relative_dirs(const std::unique_ptr<FileNode> &node, uintmax_t total_
     depth++;
 
     for (const auto &child: node->children) {
+        if (skip_level(depth)) {
+            continue;
+        }
         print_relative_dirs(child, total_size, depth);
     }
 }
@@ -140,6 +163,9 @@ void print_absolute_dirs(const std::unique_ptr<FileNode> &node, int depth)
     depth++;
 
     for (const auto &child: node->children) {
+        if (skip_level(depth)) {
+            continue;
+        }
         print_absolute_dirs(child, depth);
     }
 }
