@@ -52,7 +52,7 @@ add_executable(
   "filenode.cpp"
   "main.cpp"
   "report_json.cpp"
-  "reporting.cpp"
+  "report_pretty.cpp"
   "tree.cpp"
   "utils.cpp"
 )
