@@ -2,6 +2,10 @@
 
 float compute_relative_usage(uintmax_t size, uintmax_t total_size)
 {
+    if (total_size == 0) {
+        return 0;
+    }
+
     return ((float)size / total_size) * 100;
 }
 
