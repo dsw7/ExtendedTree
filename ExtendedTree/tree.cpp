@@ -63,46 +63,6 @@ void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stat
     }
 }
 
-void traverse_dirs_print_relative(const std::unique_ptr<FileNode> &node, uintmax_t total_size, int depth = 0)
-{
-    reporting::print(node, depth, total_size);
-    depth++;
-
-    for (const auto &child: node->children) {
-        traverse_dirs_print_relative(child, total_size, depth);
-    }
-}
-
-void traverse_dirs_print_absolute(const std::unique_ptr<FileNode> &node, int depth = 0)
-{
-    reporting::print(node, depth);
-    depth++;
-
-    for (const auto &child: node->children) {
-        traverse_dirs_print_absolute(child, depth);
-    }
-}
-
-void traverse_dirs_print_relative_dirs(const std::unique_ptr<FileNode> &node, uintmax_t total_size, int depth = 0)
-{
-    reporting::print_dirs_only(node, depth, total_size);
-    depth++;
-
-    for (const auto &child: node->children) {
-        traverse_dirs_print_relative_dirs(child, total_size, depth);
-    }
-}
-
-void traverse_dirs_print_absolute_dirs(const std::unique_ptr<FileNode> &node, int depth = 0)
-{
-    reporting::print_dirs_only(node, depth);
-    depth++;
-
-    for (const auto &child: node->children) {
-        traverse_dirs_print_absolute_dirs(child, depth);
-    }
-}
-
 } // namespace
 
 void run_tree()
@@ -126,13 +86,13 @@ void run_tree()
     }
 
     if (params.print_absolute && params.print_dirs_only) {
-        traverse_dirs_print_absolute_dirs(root);
+        reporting::print_absolute_dirs(root);
     } else if (params.print_absolute && !params.print_dirs_only) {
-        traverse_dirs_print_absolute(root);
+        reporting::print_absolute(root);
     } else if (!params.print_absolute && params.print_dirs_only) {
-        traverse_dirs_print_relative_dirs(root, stats.total_size);
+        reporting::print_relative_dirs(root, stats.total_size);
     } else {
-        traverse_dirs_print_relative(root, stats.total_size);
+        reporting::print_relative(root, stats.total_size);
     }
 
     fmt::print("\n");

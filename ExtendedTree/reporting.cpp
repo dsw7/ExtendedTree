@@ -50,10 +50,6 @@ void print_relative_usage(uintmax_t size, uintmax_t total_size)
     fmt::print(fg(green), "[ {:.{}f}% ]\n", relative_size, 2);
 }
 
-} // namespace
-
-namespace reporting {
-
 void print(const std::unique_ptr<FileNode> &node, int depth)
 {
     cache_whitespace(depth);
@@ -101,6 +97,50 @@ void print_dirs_only(const std::unique_ptr<FileNode> &node, int depth, uintmax_t
     if (node->is_directory()) {
         print_directory(node->filename, depth);
         print_relative_usage(node->get_filesize(), total_size);
+    }
+}
+
+} // namespace
+
+namespace reporting {
+
+void print_relative(const std::unique_ptr<FileNode> &node, uintmax_t total_size, int depth)
+{
+    print(node, depth, total_size);
+    depth++;
+
+    for (const auto &child: node->children) {
+        print_relative(child, total_size, depth);
+    }
+}
+
+void print_absolute(const std::unique_ptr<FileNode> &node, int depth)
+{
+    print(node, depth);
+    depth++;
+
+    for (const auto &child: node->children) {
+        print_absolute(child, depth);
+    }
+}
+
+void print_relative_dirs(const std::unique_ptr<FileNode> &node, uintmax_t total_size, int depth)
+{
+    print_dirs_only(node, depth, total_size);
+    depth++;
+
+    for (const auto &child: node->children) {
+        print_relative_dirs(child, total_size, depth);
+    }
+}
+
+void print_absolute_dirs(const std::unique_ptr<FileNode> &node, int depth)
+{
+    print_dirs_only(node, depth);
+    depth++;
+
+    for (const auto &child: node->children) {
+        print_absolute_dirs(child, depth);
     }
 }
 
