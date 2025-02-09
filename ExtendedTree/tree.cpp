@@ -21,14 +21,41 @@ struct Stats {
     uintmax_t total_size = 0;
 };
 
+bool skip_level(const std::string &filename)
+{
+    if (params.excludes.contains(filename)) {
+        return true;
+    }
+
+    return false;
+}
+
+bool skip_level(int depth)
+{
+    if (params.level < 1) {
+        return false;
+    }
+
+    if (params.level == depth - 1) {
+        return true;
+    }
+
+    return false;
+}
+
 void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stats, int depth = 0)
 {
+    depth++;
     uintmax_t dir_size = 0;
 
     for (auto const &entry: fs::directory_iterator { dir }) {
         std::string filename = entry.path().filename();
 
-        if (params.excludes.contains(filename)) {
+        if (skip_level(filename)) {
+            continue;
+        }
+
+        if (skip_level(depth)) {
             continue;
         }
 
