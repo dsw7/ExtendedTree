@@ -55,7 +55,7 @@ void parse_cli_options(int argc, char **argv)
 {
     int option = 0;
 
-    while ((option = getopt(argc, argv, "hadj:I:")) != -1) {
+    while ((option = getopt(argc, argv, "hadj:I:L:")) != -1) {
         switch (option) {
             case 'h':
                 print_help_messages();
@@ -72,6 +72,9 @@ void parse_cli_options(int argc, char **argv)
                 break;
             case 'I':
                 params.excludes.insert(optarg);
+                break;
+            case 'L':
+                params.level = std::atoi(optarg);
                 break;
             default:
                 print_help_messages();

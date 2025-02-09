@@ -8,6 +8,7 @@ struct TreeParams {
     bool print_dirs_only = false;
     bool print_json = false;
     int indent_level = -1;
+    int level = -1;
     std::set<std::string> excludes;
     std::string target;
 };
