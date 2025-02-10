@@ -97,7 +97,13 @@ void run_tree()
     }
 
     fmt::print("\n");
-    fmt::print("Total size: {} bytes\n", stats.total_size);
+
+    if (params.print_bytes) {
+        fmt::print("Total size: {}\n", stats.total_size);
+    } else {
+        fmt::print("Total size: {}\n", bytes_to_human(stats.total_size));
+    }
+
     fmt::print("Number of directories: {}\n", stats.num_directories);
     fmt::print("Number of files: {}\n", stats.num_files);
     fmt::print("Number of other file-like objects: {}\n", stats.num_other);

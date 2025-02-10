@@ -19,7 +19,8 @@ void print_help_messages()
 {
     fmt::print("Usage:\n  etree [OPTION]... DIRECTORY\n\n");
     fmt::print("Options:\n");
-    fmt::print("  -a         {}\n", "Print usage in bytes (as opposed to percentage)");
+    fmt::print("  -a         {}\n", "Print absolute space usage (as opposed to relative usage)");
+    fmt::print("  -b         {}\n", "Print absolute usage in bytes");
     fmt::print("  -d         {}\n", "Print directories only");
     fmt::print("  -j <level> {}\n", "Print output as JSON with indentation <level>");
     fmt::print("  -I         {}\n", "Exclude one or more files or directories");
@@ -55,13 +56,16 @@ void parse_cli_options(int argc, char **argv)
 {
     int option = 0;
 
-    while ((option = getopt(argc, argv, "hadj:I:L:")) != -1) {
+    while ((option = getopt(argc, argv, "habdj:I:L:")) != -1) {
         switch (option) {
             case 'h':
                 print_help_messages();
                 exit(EXIT_SUCCESS);
             case 'a':
                 params.print_absolute = true;
+                break;
+            case 'b':
+                params.print_bytes = true;
                 break;
             case 'd':
                 params.print_dirs_only = true;
