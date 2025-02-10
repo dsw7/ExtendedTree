@@ -55,7 +55,11 @@ void print_other(const std::string &filename, int depth)
 
 void print_absolute_usage(uintmax_t size)
 {
-    fmt::print(fg(green), "( {} B )\n", size);
+    if (params.print_bytes) {
+        fmt::print(fg(green), "( {} )\n", size);
+    } else {
+        fmt::print(fg(green), "( {} )\n", bytes_to_human(size));
+    }
 }
 
 void print_relative_usage(uintmax_t size, uintmax_t total_size)
