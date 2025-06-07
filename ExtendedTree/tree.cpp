@@ -20,7 +20,7 @@ struct Stats {
     uintmax_t total_size = 0;
 };
 
-void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stats, int depth = 0)
+void precompute_dir_layout(const std::string &dir, filenode::FileNode &parent, Stats &stats, int depth = 0)
 {
     depth++;
     uintmax_t dir_size = 0;
@@ -32,7 +32,7 @@ void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stat
             continue;
         }
 
-        std::unique_ptr<FileNode> child = std::make_unique<FileNode>(filename);
+        std::unique_ptr<filenode::FileNode> child = std::make_unique<filenode::FileNode>(filename);
 
         if (entry.is_regular_file()) {
             child->set_is_file();
@@ -63,7 +63,7 @@ void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stat
     }
 }
 
-void print_jsonified_output(const std::unique_ptr<FileNode> &root, const Stats &stats)
+void print_jsonified_output(const std::unique_ptr<filenode::FileNode> &root, const Stats &stats)
 {
     if (params::PRINT_ABSOLUTE) {
         reporting::print_json(root);
@@ -73,7 +73,7 @@ void print_jsonified_output(const std::unique_ptr<FileNode> &root, const Stats &
     reporting::print_json(root, stats.total_size);
 }
 
-void print_pretty_output(const std::unique_ptr<FileNode> &root, const Stats &stats)
+void print_pretty_output(const std::unique_ptr<filenode::FileNode> &root, const Stats &stats)
 {
     if (params::PRINT_ABSOLUTE) {
         if (params::PRINT_DIRS_ONLY) {
@@ -108,7 +108,7 @@ namespace tree {
 
 void run_tree()
 {
-    auto root = std::make_unique<FileNode>(params::TARGET);
+    auto root = std::make_unique<filenode::FileNode>(params::TARGET);
 
     if (fs::is_directory(params::TARGET)) {
         root->set_is_directory();

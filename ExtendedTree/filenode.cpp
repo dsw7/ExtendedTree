@@ -1,5 +1,7 @@
 #include "filenode.hpp"
 
+namespace filenode {
+
 FileNode::FileNode(const std::string &filename)
 {
     this->filename = filename;
@@ -7,40 +9,42 @@ FileNode::FileNode(const std::string &filename)
 
 void FileNode::set_filesize(uintmax_t filesize)
 {
-    this->filesize = filesize;
+    this->filesize_ = filesize;
 }
 
 uintmax_t FileNode::get_filesize()
 {
-    return this->filesize.value_or(0);
+    return this->filesize_.value_or(0);
 }
 
 void FileNode::set_is_file()
 {
-    this->filetype = REGULAR_FILE;
+    this->filetype_ = REGULAR_FILE;
 }
 
 void FileNode::set_is_directory()
 {
-    this->filetype = DIRECTORY;
+    this->filetype_ = DIRECTORY;
 }
 
 void FileNode::set_is_other()
 {
-    this->filetype = OTHER;
+    this->filetype_ = OTHER;
 }
 
 bool FileNode::is_file()
 {
-    return this->filetype == REGULAR_FILE;
+    return this->filetype_ == REGULAR_FILE;
 }
 
 bool FileNode::is_directory()
 {
-    return this->filetype == DIRECTORY;
+    return this->filetype_ == DIRECTORY;
 }
 
 bool FileNode::is_other()
 {
-    return this->filetype == OTHER;
+    return this->filetype_ == OTHER;
 }
+
+} // namespace filenode
