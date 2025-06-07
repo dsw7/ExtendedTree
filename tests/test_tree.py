@@ -137,6 +137,11 @@ class TestCommandLine(TestTree):
         self.assertRegex(process.stdout, r"bar/.*\[ 9, 50\.00% \]")
         self.assertRegex(process.stdout, r"baz/.*\[ 9, 50\.00% \]")
 
+    def test_exclude_multiple(self) -> None:
+        process = run_subprocess([self.test_dir, "-Ifoo", "-Ibar", "-Ibaz"])
+        self.assertEqual(process.exit_code, 0)
+        self.assertNotRegex(process.stdout, r"(foo|bar|baz)")
+
 
 class TestValidReporting(TestTree):
 
