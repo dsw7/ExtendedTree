@@ -98,7 +98,7 @@ int main(int argc, char **argv)
 {
     try {
         parse_cli_options(argc, argv);
-        run_tree();
+        tree::run_tree();
     } catch (const fs::filesystem_error &e) {
         std::cerr << "Error: " << e.what() << '\n';
         return EXIT_FAILURE;

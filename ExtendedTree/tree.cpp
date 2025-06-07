@@ -66,6 +66,8 @@ void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stat
 
 } // namespace
 
+namespace tree {
+
 void run_tree()
 {
     auto root = std::make_unique<FileNode>(params::TARGET);
@@ -108,3 +110,5 @@ void run_tree()
     fmt::print("Number of files: {}\n", stats.num_files);
     fmt::print("Number of other file-like objects: {}\n", stats.num_other);
 }
+
+} // namespace tree
