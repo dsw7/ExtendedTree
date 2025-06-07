@@ -1,6 +1,7 @@
+from dataclasses import dataclass
 from json import loads
 from typing import TypedDict, Iterable
-from subprocess import run, PIPE, CompletedProcess
+from subprocess import run, PIPE
 from .base import TestTree, get_path_to_etree_binary
 
 
@@ -16,9 +17,22 @@ class Tree(TypedDict):
     usage: float
 
 
-def run_subprocess(args: list[str]) -> CompletedProcess[bytes]:
+@dataclass
+class Process:
+    exit_code: int
+    stdout: str
+    stderr: str
+
+
+def run_subprocess(args: list[str]) -> Process:
     command = [get_path_to_etree_binary()] + args
-    return run(command, stdout=PIPE, stderr=PIPE)
+    process = run(command, stdout=PIPE, stderr=PIPE)
+
+    return Process(
+        exit_code=process.returncode,
+        stdout=process.stdout.decode(),
+        stderr=process.stderr.decode(),
+    )
 
 
 def traverse_level_order(stdout: Tree, layers: Layers, depth: int = 0) -> None:
