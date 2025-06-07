@@ -26,7 +26,7 @@ void print_help_messages()
     fmt::print("  -h         {}\n", "Print this help message and exit");
 }
 
-std::string sanitize_target(const std::optional<fs::path> &target_from_opts)
+std::string validate_target(const std::optional<fs::path> &target_from_opts)
 {
     fs::path target;
 
@@ -91,7 +91,7 @@ void parse_cli_options(int argc, char **argv)
         break;
     }
 
-    params.target = sanitize_target(target);
+    params.target = validate_target(target);
 }
 
 int main(int argc, char **argv)
