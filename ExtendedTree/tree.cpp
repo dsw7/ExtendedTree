@@ -63,6 +63,45 @@ void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stat
     }
 }
 
+void print_jsonified_output(const std::unique_ptr<FileNode> &root, const Stats &stats)
+{
+    if (params::PRINT_ABSOLUTE) {
+        reporting::print_json(root);
+        return;
+    }
+
+    reporting::print_json(root, stats.total_size);
+}
+
+void print_pretty_output(const std::unique_ptr<FileNode> &root, const Stats &stats)
+{
+    if (params::PRINT_ABSOLUTE) {
+        if (params::PRINT_DIRS_ONLY) {
+            reporting::print_absolute_dirs(root);
+        } else {
+            reporting::print_absolute(root);
+        }
+    } else {
+        if (params::PRINT_DIRS_ONLY) {
+            reporting::print_relative_dirs(root, stats.total_size);
+        } else {
+            reporting::print_relative(root, stats.total_size);
+        }
+    }
+
+    fmt::print("\n");
+
+    if (params::PRINT_BYTES) {
+        fmt::print("Total size: {}\n", stats.total_size);
+    } else {
+        fmt::print("Total size: {}\n", utils::bytes_to_human(stats.total_size));
+    }
+
+    fmt::print("Number of directories: {}\n", stats.num_directories);
+    fmt::print("Number of files: {}\n", stats.num_files);
+    fmt::print("Number of other file-like objects: {}\n", stats.num_other);
+}
+
 } // namespace
 
 namespace tree {
@@ -79,35 +118,10 @@ void run_tree()
     precompute_dir_layout(params::TARGET, *root, stats);
 
     if (params::PRINT_JSON) {
-        if (params::PRINT_ABSOLUTE) {
-            reporting::print_json(root);
-        } else {
-            reporting::print_json(root, stats.total_size);
-        }
-        return;
-    }
-
-    if (params::PRINT_ABSOLUTE && params::PRINT_DIRS_ONLY) {
-        reporting::print_absolute_dirs(root);
-    } else if (params::PRINT_ABSOLUTE && !params::PRINT_DIRS_ONLY) {
-        reporting::print_absolute(root);
-    } else if (!params::PRINT_ABSOLUTE && params::PRINT_DIRS_ONLY) {
-        reporting::print_relative_dirs(root, stats.total_size);
+        print_jsonified_output(root, stats);
     } else {
-        reporting::print_relative(root, stats.total_size);
+        print_pretty_output(root, stats);
     }
-
-    fmt::print("\n");
-
-    if (params::PRINT_BYTES) {
-        fmt::print("Total size: {}\n", stats.total_size);
-    } else {
-        fmt::print("Total size: {}\n", utils::bytes_to_human(stats.total_size));
-    }
-
-    fmt::print("Number of directories: {}\n", stats.num_directories);
-    fmt::print("Number of files: {}\n", stats.num_files);
-    fmt::print("Number of other file-like objects: {}\n", stats.num_other);
 }
 
 } // namespace tree
