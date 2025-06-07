@@ -75,18 +75,10 @@ void print_jsonified_output(const std::unique_ptr<filenode::FileNode> &root, con
 
 void print_pretty_output(const std::unique_ptr<filenode::FileNode> &root, const Stats &stats)
 {
-    if (params::PRINT_ABSOLUTE) {
-        if (params::PRINT_DIRS_ONLY) {
-            reporting::print_absolute_dirs(root);
-        } else {
-            reporting::print_absolute(root);
-        }
+    if (params::PRINT_DIRS_ONLY) {
+        reporting::print_relative_dirs(root, stats.total_size);
     } else {
-        if (params::PRINT_DIRS_ONLY) {
-            reporting::print_relative_dirs(root, stats.total_size);
-        } else {
-            reporting::print_relative(root, stats.total_size);
-        }
+        reporting::print_relative(root, stats.total_size);
     }
 
     fmt::print("\n");
