@@ -29,7 +29,7 @@ void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stat
     for (auto const &entry: fs::directory_iterator { dir }) {
         std::string filename = entry.path().filename();
 
-        if (params.excludes.contains(filename)) {
+        if (parameters::EXCLUDES.contains(filename)) {
             continue;
         }
 
@@ -68,17 +68,17 @@ void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stat
 
 void run_tree()
 {
-    auto root = std::make_unique<FileNode>(params.target);
+    auto root = std::make_unique<FileNode>(parameters::TARGET);
 
-    if (fs::is_directory(params.target)) {
+    if (fs::is_directory(parameters::TARGET)) {
         root->set_is_directory();
     }
 
     Stats stats;
-    precompute_dir_layout(params.target, *root, stats);
+    precompute_dir_layout(parameters::TARGET, *root, stats);
 
-    if (params.print_json) {
-        if (params.print_absolute) {
+    if (parameters::PRINT_JSON) {
+        if (parameters::PRINT_ABSOLUTE) {
             reporting::print_json(root);
         } else {
             reporting::print_json(root, stats.total_size);
@@ -86,11 +86,11 @@ void run_tree()
         return;
     }
 
-    if (params.print_absolute && params.print_dirs_only) {
+    if (parameters::PRINT_ABSOLUTE && parameters::PRINT_DIRS_ONLY) {
         reporting::print_absolute_dirs(root);
-    } else if (params.print_absolute && !params.print_dirs_only) {
+    } else if (parameters::PRINT_ABSOLUTE && !parameters::PRINT_DIRS_ONLY) {
         reporting::print_absolute(root);
-    } else if (!params.print_absolute && params.print_dirs_only) {
+    } else if (!parameters::PRINT_ABSOLUTE && parameters::PRINT_DIRS_ONLY) {
         reporting::print_relative_dirs(root, stats.total_size);
     } else {
         reporting::print_relative(root, stats.total_size);
@@ -98,7 +98,7 @@ void run_tree()
 
     fmt::print("\n");
 
-    if (params.print_bytes) {
+    if (parameters::PRINT_BYTES) {
         fmt::print("Total size: {}\n", stats.total_size);
     } else {
         fmt::print("Total size: {}\n", utils::bytes_to_human(stats.total_size));

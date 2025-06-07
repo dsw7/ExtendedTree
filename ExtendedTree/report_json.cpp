@@ -61,13 +61,13 @@ namespace reporting {
 void print_json(const std::unique_ptr<FileNode> &node)
 {
     nlohmann::json json = build_json_from_tree(node);
-    fmt::print("{}\n", json.dump(params.indent_level));
+    fmt::print("{}\n", json.dump(parameters::INDENT_LEVEL));
 }
 
 void print_json(const std::unique_ptr<FileNode> &node, uintmax_t total_size)
 {
     nlohmann::json json = build_json_from_tree(node, total_size);
-    fmt::print("{}\n", json.dump(params.indent_level));
+    fmt::print("{}\n", json.dump(parameters::INDENT_LEVEL));
 }
 
 } // namespace reporting

@@ -3,15 +3,15 @@
 #include <set>
 #include <string>
 
-struct TreeParams {
-    bool print_absolute = false;
-    bool print_bytes = false;
-    bool print_dirs_only = false;
-    bool print_json = false;
-    int indent_level = -1;
-    int level = -1;
-    std::set<std::string> excludes;
-    std::string target;
-};
+namespace parameters {
 
-extern struct TreeParams params;
+extern bool PRINT_ABSOLUTE;
+extern bool PRINT_BYTES;
+extern bool PRINT_DIRS_ONLY;
+extern bool PRINT_JSON;
+extern int INDENT_LEVEL;
+extern int LEVEL;
+extern std::set<std::string> EXCLUDES;
+extern std::string TARGET;
+
+} // namespace parameters
