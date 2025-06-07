@@ -2,8 +2,7 @@
 
 #include "filenode.hpp"
 #include "params.hpp"
-#include "report_json.hpp"
-#include "report_pretty.hpp"
+#include "reporting.hpp"
 #include "utils.hpp"
 
 #include <filesystem>
