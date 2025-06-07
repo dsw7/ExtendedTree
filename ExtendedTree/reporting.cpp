@@ -66,7 +66,7 @@ void print_absolute_usage(uintmax_t size)
 void print_relative_usage(uintmax_t size, uintmax_t total_size)
 {
     float relative_size = utils::compute_relative_usage(size, total_size);
-    fmt::print(fg(green), "[ {:.{}f}% ]\n", relative_size, 2);
+    fmt::print(fg(green), "[ {} bytes, {:.{}f}% ]\n", size, relative_size, 2);
 }
 
 void print(const std::unique_ptr<filenode::FileNode> &node, int depth)
