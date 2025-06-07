@@ -60,23 +60,23 @@ void parse_cli_options(int argc, char **argv)
                 print_help_messages();
                 exit(EXIT_SUCCESS);
             case 'a':
-                parameters::PRINT_ABSOLUTE = true;
+                params::PRINT_ABSOLUTE = true;
                 break;
             case 'b':
-                parameters::PRINT_BYTES = true;
+                params::PRINT_BYTES = true;
                 break;
             case 'd':
-                parameters::PRINT_DIRS_ONLY = true;
+                params::PRINT_DIRS_ONLY = true;
                 break;
             case 'j':
-                parameters::PRINT_JSON = true;
-                parameters::INDENT_LEVEL = std::atoi(optarg);
+                params::PRINT_JSON = true;
+                params::INDENT_LEVEL = std::atoi(optarg);
                 break;
             case 'I':
-                parameters::EXCLUDES.insert(optarg);
+                params::EXCLUDES.insert(optarg);
                 break;
             case 'L':
-                parameters::LEVEL = std::atoi(optarg);
+                params::LEVEL = std::atoi(optarg);
                 break;
             default:
                 print_help_messages();
@@ -91,7 +91,7 @@ void parse_cli_options(int argc, char **argv)
         break;
     }
 
-    parameters::TARGET = validate_target(target);
+    params::TARGET = validate_target(target);
 }
 
 int main(int argc, char **argv)

@@ -3,7 +3,7 @@
 #include <set>
 #include <string>
 
-namespace parameters {
+namespace params {
 
 extern bool PRINT_ABSOLUTE;
 extern bool PRINT_BYTES;
@@ -14,4 +14,4 @@ extern int LEVEL;
 extern std::set<std::string> EXCLUDES;
 extern std::string TARGET;
 
-} // namespace parameters
+} // namespace params

@@ -1,6 +1,6 @@
 #include "params.hpp"
 
-namespace parameters {
+namespace params {
 
 bool PRINT_ABSOLUTE = false;
 bool PRINT_BYTES = false;
@@ -11,4 +11,4 @@ int LEVEL = -1;
 std::set<std::string> EXCLUDES;
 std::string TARGET;
 
-} // namespace parameters
+} // namespace params

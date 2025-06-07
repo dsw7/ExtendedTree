@@ -18,11 +18,11 @@ constexpr fmt::terminal_color green = fmt::terminal_color::bright_green;
 
 bool skip_level(int depth)
 {
-    if (parameters::LEVEL < 1) {
+    if (params::LEVEL < 1) {
         return false;
     }
 
-    if (parameters::LEVEL == depth - 1) {
+    if (params::LEVEL == depth - 1) {
         return true;
     }
 
@@ -55,7 +55,7 @@ void print_other(const std::string &filename, int depth)
 
 void print_absolute_usage(uintmax_t size)
 {
-    if (parameters::PRINT_BYTES) {
+    if (params::PRINT_BYTES) {
         fmt::print(fg(green), "{}\n", size);
     } else {
         fmt::print(fg(green), "{}\n", utils::bytes_to_human(size));
