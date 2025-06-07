@@ -28,20 +28,20 @@ class TestMemory(TestTree):
     def test_traverse_file(self) -> None:
         run_valgrind([self.test_dir / "foo" / "a.txt"])
 
-    def test_relative(self) -> None:
+    def test_default(self) -> None:
         run_valgrind([self.test_dir])
 
-    def test_absolute(self) -> None:
-        run_valgrind([self.test_dir, "-a"])
+    def test_level(self) -> None:
+        run_valgrind([self.test_dir, "-L1"])
 
-    def test_json_absolute(self) -> None:
-        run_valgrind([self.test_dir, "-a", "-j -1"])
+    def test_exclude_dir(self) -> None:
+        run_valgrind([self.test_dir, "-Ifoo"])
 
-    def test_json_relative(self) -> None:
+    def test_human_readable(self) -> None:
+        run_valgrind([self.test_dir, "-b"])
+
+    def test_json(self) -> None:
         run_valgrind([self.test_dir, "-j -1"])
 
-    def test_dirs_only_absolute(self) -> None:
-        run_valgrind([self.test_dir, "-da"])
-
-    def test_dirs_only_relative(self) -> None:
+    def test_dirs_only(self) -> None:
         run_valgrind([self.test_dir, "-d"])

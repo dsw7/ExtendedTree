@@ -63,38 +63,20 @@ void precompute_dir_layout(const std::string &dir, filenode::FileNode &parent, S
     }
 }
 
-void print_jsonified_output(const std::unique_ptr<filenode::FileNode> &root, const Stats &stats)
-{
-    if (params::PRINT_ABSOLUTE) {
-        reporting::print_json(root);
-        return;
-    }
-
-    reporting::print_json(root, stats.total_size);
-}
-
 void print_pretty_output(const std::unique_ptr<filenode::FileNode> &root, const Stats &stats)
 {
-    if (params::PRINT_ABSOLUTE) {
-        if (params::PRINT_DIRS_ONLY) {
-            reporting::print_absolute_dirs(root);
-        } else {
-            reporting::print_absolute(root);
-        }
+    if (params::PRINT_DIRS_ONLY) {
+        reporting::print_pretty_output_dirs_only(root, stats.total_size);
     } else {
-        if (params::PRINT_DIRS_ONLY) {
-            reporting::print_relative_dirs(root, stats.total_size);
-        } else {
-            reporting::print_relative(root, stats.total_size);
-        }
+        reporting::print_pretty_output(root, stats.total_size);
     }
 
     fmt::print("\n");
 
-    if (params::PRINT_BYTES) {
-        fmt::print("Total size: {}\n", stats.total_size);
-    } else {
+    if (params::PRINT_HUMAN_READABLE) {
         fmt::print("Total size: {}\n", utils::bytes_to_human(stats.total_size));
+    } else {
+        fmt::print("Total size: {}\n", stats.total_size);
     }
 
     fmt::print("Number of directories: {}\n", stats.num_directories);
@@ -118,7 +100,7 @@ void run_tree()
     precompute_dir_layout(params::TARGET, *root, stats);
 
     if (params::PRINT_JSON) {
-        print_jsonified_output(root, stats);
+        reporting::print_json(root, stats.total_size);
     } else {
         print_pretty_output(root, stats);
     }
