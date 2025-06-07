@@ -58,13 +58,51 @@ class TestCommandLine(TestTree):
         process = run_subprocess([self.test_dir])
         self.assertEqual(process.returncode, 0)
 
+        stdout = process.stdout.decode()
+        self.assertRegex(stdout, "foo/.*[ 9 bytes, 33.33% ]")
+        self.assertRegex(stdout, "a.txt.*[ 3 bytes, 11.11% ]")
+
     def test_human_readable(self) -> None:
         process = run_subprocess([self.test_dir, "-b"])
         self.assertEqual(process.returncode, 0)
 
+        stdout = process.stdout.decode()
+        self.assertRegex(stdout, "foo/.*[ 9, 33.33% ]")
+        self.assertRegex(stdout, "bar/.*[ 9, 33.33% ]")
+        self.assertRegex(stdout, "baz/.*[ 9, 33.33% ]")
+
+    def test_exclude(self) -> None:
+        process = run_subprocess([self.test_dir, "-Ifoo"])
+        self.assertEqual(process.returncode, 0)
+
+        stdout = process.stdout.decode()
+        self.assertNotRegex(stdout, "foo/.*[ 9, 33.33% ]")
+        self.assertRegex(stdout, "bar/.*[ 9, 33.33% ]")
+        self.assertRegex(stdout, "baz/.*[ 9, 33.33% ]")
+
     def test_dirs_only(self) -> None:
         process = run_subprocess([self.test_dir, "-d"])
         self.assertEqual(process.returncode, 0)
+
+        stdout = process.stdout.decode()
+        self.assertRegex(stdout, "foo/.*[ 9, 33.33% ]")
+        self.assertRegex(stdout, "bar/.*[ 9, 33.33% ]")
+        self.assertRegex(stdout, "baz/.*[ 9, 33.33% ]")
+        self.assertNotRegex(stdout, "a.txt.*[ 3, 11.11% ]")
+        self.assertNotRegex(stdout, "b.txt.*[ 3, 11.11% ]")
+        self.assertNotRegex(stdout, "c.txt.*[ 3, 11.11% ]")
+
+    def test_dirs_only_exclude(self) -> None:
+        process = run_subprocess([self.test_dir, "-d", "-Ifoo"])
+        self.assertEqual(process.returncode, 0)
+
+        stdout = process.stdout.decode()
+        self.assertNotRegex(stdout, "foo/.*[ 9, 33.33% ]")
+        self.assertRegex(stdout, "bar/.*[ 9, 33.33% ]")
+        self.assertRegex(stdout, "baz/.*[ 9, 33.33% ]")
+        self.assertNotRegex(stdout, "a.txt.*[ 3, 11.11% ]")
+        self.assertNotRegex(stdout, "b.txt.*[ 3, 11.11% ]")
+        self.assertNotRegex(stdout, "c.txt.*[ 3, 11.11% ]")
 
     def test_dirs_only_human_readable(self) -> None:
         process = run_subprocess([self.test_dir, "-db"])
