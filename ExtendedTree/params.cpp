@@ -2,7 +2,6 @@
 
 namespace params {
 
-bool PRINT_ABSOLUTE = false;
 bool PRINT_BYTES = false;
 bool PRINT_DIRS_ONLY = false;
 bool PRINT_JSON = false;

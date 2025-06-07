@@ -5,7 +5,6 @@
 
 namespace params {
 
-extern bool PRINT_ABSOLUTE;
 extern bool PRINT_BYTES;
 extern bool PRINT_DIRS_ONLY;
 extern bool PRINT_JSON;
