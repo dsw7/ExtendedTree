@@ -101,7 +101,7 @@ void run_tree()
     if (params.print_bytes) {
         fmt::print("Total size: {}\n", stats.total_size);
     } else {
-        fmt::print("Total size: {}\n", bytes_to_human(stats.total_size));
+        fmt::print("Total size: {}\n", utils::bytes_to_human(stats.total_size));
     }
 
     fmt::print("Number of directories: {}\n", stats.num_directories);

@@ -47,7 +47,7 @@ std::string sanitize_target(const std::optional<fs::path> &target_from_opts)
     }
 
     std::string target_str = target.string();
-    strip_extra_path_delimiter(target_str);
+    utils::strip_extra_path_delimiter(target_str);
 
     return target_str;
 }

@@ -58,13 +58,13 @@ void print_absolute_usage(uintmax_t size)
     if (params.print_bytes) {
         fmt::print(fg(green), "{}\n", size);
     } else {
-        fmt::print(fg(green), "{}\n", bytes_to_human(size));
+        fmt::print(fg(green), "{}\n", utils::bytes_to_human(size));
     }
 }
 
 void print_relative_usage(uintmax_t size, uintmax_t total_size)
 {
-    float relative_size = compute_relative_usage(size, total_size);
+    float relative_size = utils::compute_relative_usage(size, total_size);
     fmt::print(fg(green), "[ {:.{}f}% ]\n", relative_size, 2);
 }
 

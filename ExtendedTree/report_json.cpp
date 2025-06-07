@@ -38,9 +38,9 @@ nlohmann::json build_json_from_tree(const std::unique_ptr<FileNode> &node, uintm
     j["filename"] = node->filename;
 
     if (node->is_file()) {
-        j["filesize"] = compute_relative_usage(node->get_filesize(), total_size);
+        j["filesize"] = utils::compute_relative_usage(node->get_filesize(), total_size);
     } else if (node->is_directory()) {
-        j["filesize"] = compute_relative_usage(node->get_filesize(), total_size);
+        j["filesize"] = utils::compute_relative_usage(node->get_filesize(), total_size);
     } else {
         j["filesize"] = nullptr;
     }
