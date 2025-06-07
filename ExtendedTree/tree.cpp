@@ -73,10 +73,10 @@ void print_pretty_output(const std::unique_ptr<filenode::FileNode> &root, const 
 
     fmt::print("\n");
 
-    if (params::PRINT_BYTES) {
-        fmt::print("Total size: {}\n", stats.total_size);
-    } else {
+    if (params::PRINT_HUMAN_READABLE) {
         fmt::print("Total size: {}\n", utils::bytes_to_human(stats.total_size));
+    } else {
+        fmt::print("Total size: {}\n", stats.total_size);
     }
 
     fmt::print("Number of directories: {}\n", stats.num_directories);

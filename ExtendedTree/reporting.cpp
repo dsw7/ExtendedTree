@@ -58,10 +58,10 @@ void print_relative_usage(uintmax_t size, uintmax_t total_size)
 {
     float relative_size = utils::compute_relative_usage(size, total_size);
 
-    if (params::PRINT_BYTES) {
-        fmt::print(fg(green), "[ {} bytes, {:.{}f}% ]\n", size, relative_size, 2);
-    } else {
+    if (params::PRINT_HUMAN_READABLE) {
         fmt::print(fg(green), "[ {}, {:.{}f}% ]\n", utils::bytes_to_human(size), relative_size, 2);
+    } else {
+        fmt::print(fg(green), "[ {} bytes, {:.{}f}% ]\n", size, relative_size, 2);
     }
 }
 
