@@ -1,28 +1,35 @@
 from json import loads
-from typing import TypedDict, TypeAlias, Iterable
+from typing import TypedDict, Iterable
 from subprocess import run, PIPE, CompletedProcess
 from .base import TestTree, get_path_to_etree_binary
 
 
-Layers: TypeAlias = dict[int, list[int]]
+class Layers(TypedDict):
+    filesize: dict[int, list[int]]
+    usage: dict[int, list[float]]
 
 
 class Tree(TypedDict):
+    children: Iterable["Tree"]
     filename: str
     filesize: int
-    children: Iterable["Tree"]
+    usage: float
 
 
-def run_subprocess(args: list[str]) -> CompletedProcess:
+def run_subprocess(args: list[str]) -> CompletedProcess[bytes]:
     command = [get_path_to_etree_binary()] + args
     return run(command, stdout=PIPE, stderr=PIPE)
 
 
 def traverse_level_order(stdout: Tree, layers: Layers, depth: int = 0) -> None:
-    if depth not in layers:
-        layers[depth] = []
+    if depth not in layers["filesize"]:
+        layers["filesize"][depth] = []
 
-    layers[depth].append(stdout["filesize"])
+    if depth not in layers["usage"]:
+        layers["usage"][depth] = []
+
+    layers["filesize"][depth].append(stdout["filesize"])
+    layers["usage"][depth].append(stdout["usage"])
 
     depth += 1
 
@@ -47,113 +54,117 @@ class TestCommandLine(TestTree):
         self.assertEqual(process.returncode, 1)
         self.assertIn("Error: Not a valid directory", process.stderr.decode())
 
-    def test_relative(self) -> None:
+    def test_default(self) -> None:
         process = run_subprocess([self.test_dir])
         self.assertEqual(process.returncode, 0)
 
-    def test_absolute(self) -> None:
-        process = run_subprocess([self.test_dir, "-a"])
+    def test_human_readable(self) -> None:
+        process = run_subprocess([self.test_dir, "-b"])
         self.assertEqual(process.returncode, 0)
 
-    def test_json_absolute(self) -> None:
-        process = run_subprocess([self.test_dir, "-a", "-j -1"])
-        self.assertEqual(process.returncode, 0)
-
-    def test_json_relative(self) -> None:
-        process = run_subprocess([self.test_dir, "-j -1"])
-        self.assertEqual(process.returncode, 0)
-
-    def test_dirs_only_absolute(self) -> None:
-        process = run_subprocess([self.test_dir, "-da"])
-        self.assertEqual(process.returncode, 0)
-
-    def test_dirs_only_relative(self) -> None:
+    def test_dirs_only(self) -> None:
         process = run_subprocess([self.test_dir, "-d"])
+        self.assertEqual(process.returncode, 0)
+
+    def test_dirs_only_human_readable(self) -> None:
+        process = run_subprocess([self.test_dir, "-db"])
         self.assertEqual(process.returncode, 0)
 
 
 class TestValidReporting(TestTree):
 
-    def test_absolute(self) -> None:
-        process = run_subprocess([self.test_dir, "-a", "-j -1"])
-        stdout: Tree = loads(process.stdout.decode())
-
-        layers: Layers = {}
-        traverse_level_order(stdout, layers)
-
-        self.assertListEqual(layers[0], [27])
-        self.assertListEqual(layers[1], [9, 9, 9])
-        self.assertListEqual(layers[2], [3, 3, 3, 3, 3, 3, 3, 3, 3])
-
-    def test_relative(self) -> None:
+    def test_filesizes(self) -> None:
         process = run_subprocess([self.test_dir, "-j -1"])
-        stdout: Tree = loads(process.stdout.decode())
+        self.assertEqual(process.returncode, 0)
 
-        layers: Layers = {}
+        stdout: Tree = loads(process.stdout.decode())
+        layers = Layers(filesize={}, usage={})
         traverse_level_order(stdout, layers)
 
-        self.assertListEqual(layers[0], [100.0])
-        self.assertEqual(len(layers[1]), 3)
-        self.assertEqual(len(layers[2]), 9)
+        filesizes = layers["filesize"]
+        self.assertListEqual(filesizes[0], [27])
+        self.assertListEqual(filesizes[1], [9, 9, 9])
+        self.assertListEqual(filesizes[2], [3, 3, 3, 3, 3, 3, 3, 3, 3])
+
+    def test_usages(self) -> None:
+        process = run_subprocess([self.test_dir, "-j -1"])
+        self.assertEqual(process.returncode, 0)
+
+        stdout: Tree = loads(process.stdout.decode())
+        layers = Layers(filesize={}, usage={})
+        traverse_level_order(stdout, layers)
+
+        usages = layers["usage"]
+        self.assertListEqual(usages[0], [100.0])
+        self.assertEqual(len(usages[1]), 3)
+        self.assertEqual(len(usages[2]), 9)
 
         for i in range(3):
-            self.assertAlmostEqual(layers[1][i], 33.3333, places=4)
+            self.assertAlmostEqual(usages[1][i], 33.3333, places=4)
 
         for i in range(9):
-            self.assertAlmostEqual(layers[2][i], 11.1111, places=4)
+            self.assertAlmostEqual(usages[2][i], 11.1111, places=4)
 
-    def test_absolute_exclude(self) -> None:
-        process = run_subprocess([self.test_dir, "-a", "-j -1", "-Ifoo"])
-        stdout: Tree = loads(process.stdout.decode())
-
-        layers: Layers = {}
-        traverse_level_order(stdout, layers)
-
-        self.assertListEqual(layers[0], [18])
-        self.assertListEqual(layers[1], [9, 9])
-        self.assertListEqual(layers[2], [3, 3, 3, 3, 3, 3])
-
-    def test_relative_exclude(self) -> None:
+    def test_filesizes_with_exclude(self) -> None:
         process = run_subprocess([self.test_dir, "-j -1", "-Ifoo"])
-        stdout: Tree = loads(process.stdout.decode())
+        self.assertEqual(process.returncode, 0)
 
-        layers: Layers = {}
+        stdout: Tree = loads(process.stdout.decode())
+        layers = Layers(filesize={}, usage={})
         traverse_level_order(stdout, layers)
 
-        self.assertListEqual(layers[0], [100.0])
-        self.assertEqual(len(layers[1]), 2)
-        self.assertEqual(len(layers[2]), 6)
+        filesizes = layers["filesize"]
+        self.assertListEqual(filesizes[0], [18])
+        self.assertListEqual(filesizes[1], [9, 9])
+        self.assertListEqual(filesizes[2], [3, 3, 3, 3, 3, 3])
+
+    def test_usages_with_exclude(self) -> None:
+        process = run_subprocess([self.test_dir, "-j -1", "-Ifoo"])
+        self.assertEqual(process.returncode, 0)
+
+        stdout: Tree = loads(process.stdout.decode())
+        layers = Layers(filesize={}, usage={})
+        traverse_level_order(stdout, layers)
+
+        usages = layers["usage"]
+        self.assertListEqual(usages[0], [100.0])
+        self.assertEqual(len(usages[1]), 2)
+        self.assertEqual(len(usages[2]), 6)
 
         for i in range(2):
-            self.assertAlmostEqual(layers[1][i], 50.0, places=4)
+            self.assertAlmostEqual(usages[1][i], 50.0, places=4)
 
         for i in range(6):
-            self.assertAlmostEqual(layers[2][i], 16.6667, places=4)
+            self.assertAlmostEqual(usages[2][i], 16.6667, places=4)
 
-    def test_absolute_exclude_2(self) -> None:
-        process = run_subprocess([self.test_dir, "-a", "-j -1", "-Ifoo", "-Ibar"])
-        stdout: Tree = loads(process.stdout.decode())
-
-        layers: Layers = {}
-        traverse_level_order(stdout, layers)
-
-        self.assertListEqual(layers[0], [9])
-        self.assertListEqual(layers[1], [9])
-        self.assertListEqual(layers[2], [3, 3, 3])
-
-    def test_relative_exclude_2(self) -> None:
+    def test_filesizes_with_exclude_2(self) -> None:
         process = run_subprocess([self.test_dir, "-j -1", "-Ifoo", "-Ibar"])
-        stdout: Tree = loads(process.stdout.decode())
+        self.assertEqual(process.returncode, 0)
 
-        layers: Layers = {}
+        stdout: Tree = loads(process.stdout.decode())
+        layers = Layers(filesize={}, usage={})
         traverse_level_order(stdout, layers)
 
-        self.assertListEqual(layers[0], [100.0])
-        self.assertEqual(len(layers[1]), 1)
-        self.assertEqual(len(layers[2]), 3)
+        filesizes = layers["filesize"]
+        self.assertListEqual(filesizes[0], [9])
+        self.assertListEqual(filesizes[1], [9])
+        self.assertListEqual(filesizes[2], [3, 3, 3])
+
+    def test_usages_with_exclude_2(self) -> None:
+        process = run_subprocess([self.test_dir, "-j -1", "-Ifoo", "-Ibar"])
+        self.assertEqual(process.returncode, 0)
+
+        stdout: Tree = loads(process.stdout.decode())
+        layers = Layers(filesize={}, usage={})
+        traverse_level_order(stdout, layers)
+
+        usages = layers["usage"]
+        self.assertListEqual(usages[0], [100.0])
+        self.assertEqual(len(usages[1]), 1)
+        self.assertEqual(len(usages[2]), 3)
 
         for i in range(1):
-            self.assertAlmostEqual(layers[1][i], 100.0, places=4)
+            self.assertAlmostEqual(usages[1][i], 100.0, places=4)
 
         for i in range(3):
-            self.assertAlmostEqual(layers[2][i], 33.3333, places=4)
+            self.assertAlmostEqual(usages[2][i], 33.3333, places=4)
