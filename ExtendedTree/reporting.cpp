@@ -140,7 +140,7 @@ nlohmann::json build_json_from_tree(const std::unique_ptr<filenode::FileNode> &n
 
 namespace reporting {
 
-void print_relative(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size, int depth)
+void print_pretty_output(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size, int depth)
 {
     print(node, depth, total_size);
     depth++;
@@ -149,11 +149,11 @@ void print_relative(const std::unique_ptr<filenode::FileNode> &node, uintmax_t t
         if (skip_level(depth)) {
             continue;
         }
-        print_relative(child, total_size, depth);
+        print_pretty_output(child, total_size, depth);
     }
 }
 
-void print_relative_dirs(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size, int depth)
+void print_pretty_output_dirs_only(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size, int depth)
 {
     print_dirs_only(node, depth, total_size);
     depth++;
@@ -162,7 +162,7 @@ void print_relative_dirs(const std::unique_ptr<filenode::FileNode> &node, uintma
         if (skip_level(depth)) {
             continue;
         }
-        print_relative_dirs(child, total_size, depth);
+        print_pretty_output_dirs_only(child, total_size, depth);
     }
 }
 
