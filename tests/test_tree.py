@@ -55,114 +55,96 @@ class TestCommandLine(TestTree):
 
     def test_help(self) -> None:
         process = run_subprocess(["-h"])
-        self.assertEqual(process.returncode, 0)
-        self.assertIn("Usage:", process.stdout.decode())
+        self.assertEqual(process.exit_code, 0)
+        self.assertIn("Usage:", process.stdout)
 
     def test_missing_dir(self) -> None:
         process = run_subprocess(["/foobar"])
-        self.assertEqual(process.returncode, 1)
-        self.assertIn("Error: Directory does not exist", process.stderr.decode())
+        self.assertEqual(process.exit_code, 1)
+        self.assertIn("Error: Directory does not exist", process.stderr)
 
     def test_traverse_file(self) -> None:
         process = run_subprocess([self.test_dir / "foo" / "a.txt"])
-        self.assertEqual(process.returncode, 1)
-        self.assertIn("Error: Not a valid directory", process.stderr.decode())
+        self.assertEqual(process.exit_code, 1)
+        self.assertIn("Error: Not a valid directory", process.stderr)
 
     def test_default(self) -> None:
         process = run_subprocess([self.test_dir])
-        self.assertEqual(process.returncode, 0)
-
-        stdout = process.stdout.decode()
-        self.assertRegex(stdout, r"foo/.*\[ 9 bytes, 33\.33% \]")
-        self.assertRegex(stdout, r"a.txt.*\[ 3 bytes, 11\.11% \]")
+        self.assertEqual(process.exit_code, 0)
+        self.assertRegex(process.stdout, r"foo/.*\[ 9 bytes, 33\.33% \]")
+        self.assertRegex(process.stdout, r"a.txt.*\[ 3 bytes, 11\.11% \]")
 
     def test_human_readable(self) -> None:
         process = run_subprocess([self.test_dir, "-b"])
-        self.assertEqual(process.returncode, 0)
-
-        stdout = process.stdout.decode()
-        self.assertRegex(stdout, r"foo/.*\[ 9, 33\.33% \]")
-        self.assertRegex(stdout, r"bar/.*\[ 9, 33\.33% \]")
-        self.assertRegex(stdout, r"baz/.*\[ 9, 33\.33% \]")
-        self.assertRegex(stdout, r"(a\.txt|b\.txt|c\.txt)")
+        self.assertEqual(process.exit_code, 0)
+        self.assertRegex(process.stdout, r"foo/.*\[ 9, 33\.33% \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 9, 33\.33% \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 9, 33\.33% \]")
+        self.assertRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
 
     def test_exclude(self) -> None:
         process = run_subprocess([self.test_dir, "-Ifoo"])
-        self.assertEqual(process.returncode, 0)
-
-        stdout = process.stdout.decode()
-        self.assertNotRegex(stdout, "foo")
-        self.assertRegex(stdout, r"bar/.*\[ 9 bytes, 50\.00% \]")
-        self.assertRegex(stdout, r"baz/.*\[ 9 bytes, 50\.00% \]")
+        self.assertEqual(process.exit_code, 0)
+        self.assertNotRegex(process.stdout, "foo")
+        self.assertRegex(process.stdout, r"bar/.*\[ 9 bytes, 50\.00% \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 9 bytes, 50\.00% \]")
 
     def test_dirs_only(self) -> None:
         process = run_subprocess([self.test_dir, "-d"])
-        self.assertEqual(process.returncode, 0)
-
-        stdout = process.stdout.decode()
-        self.assertRegex(stdout, r"foo/.*\[ 9 bytes, 33\.33% \]")
-        self.assertRegex(stdout, r"bar/.*\[ 9 bytes, 33\.33% \]")
-        self.assertRegex(stdout, r"baz/.*\[ 9 bytes, 33\.33% \]")
-        self.assertNotRegex(stdout, r"(a\.txt|b\.txt|c\.txt)")
+        self.assertEqual(process.exit_code, 0)
+        self.assertRegex(process.stdout, r"foo/.*\[ 9 bytes, 33\.33% \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 9 bytes, 33\.33% \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 9 bytes, 33\.33% \]")
+        self.assertNotRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
 
     def test_dirs_only_exclude(self) -> None:
         process = run_subprocess([self.test_dir, "-d", "-Ifoo"])
-        self.assertEqual(process.returncode, 0)
-
-        stdout = process.stdout.decode()
-        self.assertNotRegex(stdout, "foo")
-        self.assertRegex(stdout, r"bar/.*\[ 9 bytes, 50\.00% \]")
-        self.assertRegex(stdout, r"baz/.*\[ 9 bytes, 50\.00% \]")
-        self.assertNotRegex(stdout, r"(a\.txt|b\.txt|c\.txt)")
+        self.assertEqual(process.exit_code, 0)
+        self.assertNotRegex(process.stdout, "foo")
+        self.assertRegex(process.stdout, r"bar/.*\[ 9 bytes, 50\.00% \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 9 bytes, 50\.00% \]")
+        self.assertNotRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
 
     def test_dirs_only_human_readable(self) -> None:
         process = run_subprocess([self.test_dir, "-db"])
-        self.assertEqual(process.returncode, 0)
-
-        stdout = process.stdout.decode()
-        self.assertRegex(stdout, r"foo/.*\[ 9, 33\.33% \]")
-        self.assertRegex(stdout, r"bar/.*\[ 9, 33\.33% \]")
-        self.assertRegex(stdout, r"baz/.*\[ 9, 33\.33% \]")
-        self.assertNotRegex(stdout, r"(a\.txt|b\.txt|c\.txt)")
+        self.assertEqual(process.exit_code, 0)
+        self.assertRegex(process.stdout, r"foo/.*\[ 9, 33\.33% \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 9, 33\.33% \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 9, 33\.33% \]")
+        self.assertNotRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
 
     def test_level(self) -> None:
         process = run_subprocess([self.test_dir, "-L1"])
-        self.assertEqual(process.returncode, 0)
-
-        stdout = process.stdout.decode()
-        self.assertRegex(stdout, r"foo/.*\[ 9 bytes, 33\.33% \]")
-        self.assertRegex(stdout, r"bar/.*\[ 9 bytes, 33\.33% \]")
-        self.assertRegex(stdout, r"baz/.*\[ 9 bytes, 33\.33% \]")
-        self.assertNotRegex(stdout, r"(a\.txt|b\.txt|c\.txt)")
+        self.assertEqual(process.exit_code, 0)
+        self.assertRegex(process.stdout, r"foo/.*\[ 9 bytes, 33\.33% \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 9 bytes, 33\.33% \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 9 bytes, 33\.33% \]")
+        self.assertNotRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
 
     def test_level_human_readable(self) -> None:
         process = run_subprocess([self.test_dir, "-L1", "-b"])
-        self.assertEqual(process.returncode, 0)
-
-        stdout = process.stdout.decode()
-        self.assertRegex(stdout, r"foo/.*\[ 9, 33\.33% \]")
-        self.assertRegex(stdout, r"bar/.*\[ 9, 33\.33% \]")
-        self.assertRegex(stdout, r"baz/.*\[ 9, 33\.33% \]")
-        self.assertNotRegex(stdout, r"(a\.txt|b\.txt|c\.txt)")
+        self.assertEqual(process.exit_code, 0)
+        self.assertRegex(process.stdout, r"foo/.*\[ 9, 33\.33% \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 9, 33\.33% \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 9, 33\.33% \]")
+        self.assertNotRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
 
     def test_level_human_readable_exclude(self) -> None:
         process = run_subprocess([self.test_dir, "-L1", "-b", "-Ifoo"])
-        self.assertEqual(process.returncode, 0)
-
-        stdout = process.stdout.decode()
-        self.assertNotRegex(stdout, "foo")
-        self.assertNotRegex(stdout, r"(a\.txt|b\.txt|c\.txt)")
-        self.assertRegex(stdout, r"bar/.*\[ 9, 50\.00% \]")
-        self.assertRegex(stdout, r"baz/.*\[ 9, 50\.00% \]")
+        self.assertEqual(process.exit_code, 0)
+        self.assertNotRegex(process.stdout, "foo")
+        self.assertNotRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
+        self.assertRegex(process.stdout, r"bar/.*\[ 9, 50\.00% \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 9, 50\.00% \]")
 
 
 class TestValidReporting(TestTree):
 
     def test_filesizes(self) -> None:
         process = run_subprocess([self.test_dir, "-j -1"])
-        self.assertEqual(process.returncode, 0)
+        self.assertEqual(process.exit_code, 0)
 
-        stdout: Tree = loads(process.stdout.decode())
+        stdout: Tree = loads(process.stdout)
         layers = Layers(filesize={}, usage={})
         traverse_level_order(stdout, layers)
 
@@ -173,9 +155,9 @@ class TestValidReporting(TestTree):
 
     def test_usages(self) -> None:
         process = run_subprocess([self.test_dir, "-j -1"])
-        self.assertEqual(process.returncode, 0)
+        self.assertEqual(process.exit_code, 0)
 
-        stdout: Tree = loads(process.stdout.decode())
+        stdout: Tree = loads(process.stdout)
         layers = Layers(filesize={}, usage={})
         traverse_level_order(stdout, layers)
 
@@ -192,9 +174,9 @@ class TestValidReporting(TestTree):
 
     def test_filesizes_with_exclude(self) -> None:
         process = run_subprocess([self.test_dir, "-j -1", "-Ifoo"])
-        self.assertEqual(process.returncode, 0)
+        self.assertEqual(process.exit_code, 0)
 
-        stdout: Tree = loads(process.stdout.decode())
+        stdout: Tree = loads(process.stdout)
         layers = Layers(filesize={}, usage={})
         traverse_level_order(stdout, layers)
 
@@ -205,9 +187,9 @@ class TestValidReporting(TestTree):
 
     def test_usages_with_exclude(self) -> None:
         process = run_subprocess([self.test_dir, "-j -1", "-Ifoo"])
-        self.assertEqual(process.returncode, 0)
+        self.assertEqual(process.exit_code, 0)
 
-        stdout: Tree = loads(process.stdout.decode())
+        stdout: Tree = loads(process.stdout)
         layers = Layers(filesize={}, usage={})
         traverse_level_order(stdout, layers)
 
@@ -224,9 +206,9 @@ class TestValidReporting(TestTree):
 
     def test_filesizes_with_exclude_2(self) -> None:
         process = run_subprocess([self.test_dir, "-j -1", "-Ifoo", "-Ibar"])
-        self.assertEqual(process.returncode, 0)
+        self.assertEqual(process.exit_code, 0)
 
-        stdout: Tree = loads(process.stdout.decode())
+        stdout: Tree = loads(process.stdout)
         layers = Layers(filesize={}, usage={})
         traverse_level_order(stdout, layers)
 
@@ -237,9 +219,9 @@ class TestValidReporting(TestTree):
 
     def test_usages_with_exclude_2(self) -> None:
         process = run_subprocess([self.test_dir, "-j -1", "-Ifoo", "-Ibar"])
-        self.assertEqual(process.returncode, 0)
+        self.assertEqual(process.exit_code, 0)
 
-        stdout: Tree = loads(process.stdout.decode())
+        stdout: Tree = loads(process.stdout)
         layers = Layers(filesize={}, usage={})
         traverse_level_order(stdout, layers)
 
