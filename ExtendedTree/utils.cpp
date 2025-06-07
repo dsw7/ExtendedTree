@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+namespace utils {
 void strip_extra_path_delimiter(std::string &path)
 {
     if (path.size() < 2) {
@@ -47,3 +48,5 @@ std::string bytes_to_human(uintmax_t bytes)
 
     return result;
 }
+
+} // namespace utils

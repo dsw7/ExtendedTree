@@ -11,8 +11,6 @@
 #include <string>
 #include <unistd.h>
 
-TreeParams params;
-
 namespace fs = std::filesystem;
 
 void print_help_messages()
@@ -28,7 +26,7 @@ void print_help_messages()
     fmt::print("  -h         {}\n", "Print this help message and exit");
 }
 
-std::string sanitize_target(const std::optional<fs::path> &target_from_opts)
+std::string validate_target(const std::optional<fs::path> &target_from_opts)
 {
     fs::path target;
 
@@ -47,7 +45,7 @@ std::string sanitize_target(const std::optional<fs::path> &target_from_opts)
     }
 
     std::string target_str = target.string();
-    strip_extra_path_delimiter(target_str);
+    utils::strip_extra_path_delimiter(target_str);
 
     return target_str;
 }
@@ -62,23 +60,23 @@ void parse_cli_options(int argc, char **argv)
                 print_help_messages();
                 exit(EXIT_SUCCESS);
             case 'a':
-                params.print_absolute = true;
+                params::PRINT_ABSOLUTE = true;
                 break;
             case 'b':
-                params.print_bytes = true;
+                params::PRINT_BYTES = true;
                 break;
             case 'd':
-                params.print_dirs_only = true;
+                params::PRINT_DIRS_ONLY = true;
                 break;
             case 'j':
-                params.print_json = true;
-                params.indent_level = std::atoi(optarg);
+                params::PRINT_JSON = true;
+                params::INDENT_LEVEL = std::atoi(optarg);
                 break;
             case 'I':
-                params.excludes.insert(optarg);
+                params::EXCLUDES.insert(optarg);
                 break;
             case 'L':
-                params.level = std::atoi(optarg);
+                params::LEVEL = std::atoi(optarg);
                 break;
             default:
                 print_help_messages();
@@ -93,14 +91,14 @@ void parse_cli_options(int argc, char **argv)
         break;
     }
 
-    params.target = sanitize_target(target);
+    params::TARGET = validate_target(target);
 }
 
 int main(int argc, char **argv)
 {
     try {
         parse_cli_options(argc, argv);
-        run_tree();
+        tree::run_tree();
     } catch (const fs::filesystem_error &e) {
         std::cerr << "Error: " << e.what() << '\n';
         return EXIT_FAILURE;

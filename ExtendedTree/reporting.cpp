@@ -1,10 +1,11 @@
-#include "report_pretty.hpp"
+#include "reporting.hpp"
 
 #include "params.hpp"
 #include "utils.hpp"
 
 #include <fmt/color.h>
 #include <fmt/core.h>
+#include <json.hpp>
 #include <map>
 #include <string>
 
@@ -18,11 +19,11 @@ constexpr fmt::terminal_color green = fmt::terminal_color::bright_green;
 
 bool skip_level(int depth)
 {
-    if (params.level < 1) {
+    if (params::LEVEL < 1) {
         return false;
     }
 
-    if (params.level == depth - 1) {
+    if (params::LEVEL == depth - 1) {
         return true;
     }
 
@@ -55,20 +56,20 @@ void print_other(const std::string &filename, int depth)
 
 void print_absolute_usage(uintmax_t size)
 {
-    if (params.print_bytes) {
+    if (params::PRINT_BYTES) {
         fmt::print(fg(green), "{}\n", size);
     } else {
-        fmt::print(fg(green), "{}\n", bytes_to_human(size));
+        fmt::print(fg(green), "{}\n", utils::bytes_to_human(size));
     }
 }
 
 void print_relative_usage(uintmax_t size, uintmax_t total_size)
 {
-    float relative_size = compute_relative_usage(size, total_size);
+    float relative_size = utils::compute_relative_usage(size, total_size);
     fmt::print(fg(green), "[ {:.{}f}% ]\n", relative_size, 2);
 }
 
-void print(const std::unique_ptr<FileNode> &node, int depth)
+void print(const std::unique_ptr<filenode::FileNode> &node, int depth)
 {
     cache_whitespace(depth);
 
@@ -83,7 +84,7 @@ void print(const std::unique_ptr<FileNode> &node, int depth)
     }
 }
 
-void print(const std::unique_ptr<FileNode> &node, int depth, uintmax_t total_size)
+void print(const std::unique_ptr<filenode::FileNode> &node, int depth, uintmax_t total_size)
 {
     cache_whitespace(depth);
 
@@ -98,7 +99,7 @@ void print(const std::unique_ptr<FileNode> &node, int depth, uintmax_t total_siz
     }
 }
 
-void print_dirs_only(const std::unique_ptr<FileNode> &node, int depth)
+void print_dirs_only(const std::unique_ptr<filenode::FileNode> &node, int depth)
 {
     cache_whitespace(depth);
 
@@ -108,7 +109,7 @@ void print_dirs_only(const std::unique_ptr<FileNode> &node, int depth)
     }
 }
 
-void print_dirs_only(const std::unique_ptr<FileNode> &node, int depth, uintmax_t total_size)
+void print_dirs_only(const std::unique_ptr<filenode::FileNode> &node, int depth, uintmax_t total_size)
 {
     cache_whitespace(depth);
 
@@ -116,13 +117,59 @@ void print_dirs_only(const std::unique_ptr<FileNode> &node, int depth, uintmax_t
         print_directory(node->filename, depth);
         print_relative_usage(node->get_filesize(), total_size);
     }
+}
+
+nlohmann::json build_json_from_tree(const std::unique_ptr<filenode::FileNode> &node)
+{
+    nlohmann::json j;
+
+    j["filename"] = node->filename;
+
+    if (node->is_file()) {
+        j["filesize"] = node->get_filesize();
+    } else if (node->is_directory()) {
+        j["filesize"] = node->get_filesize();
+    } else {
+        j["filesize"] = nullptr;
+    }
+
+    j["children"] = nlohmann::json::array();
+
+    for (const auto &child: node->children) {
+        j["children"].push_back(build_json_from_tree(child));
+    }
+
+    return j;
+}
+
+nlohmann::json build_json_from_tree(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size)
+{
+    nlohmann::json j;
+
+    j["filename"] = node->filename;
+
+    if (node->is_file()) {
+        j["filesize"] = utils::compute_relative_usage(node->get_filesize(), total_size);
+    } else if (node->is_directory()) {
+        j["filesize"] = utils::compute_relative_usage(node->get_filesize(), total_size);
+    } else {
+        j["filesize"] = nullptr;
+    }
+
+    j["children"] = nlohmann::json::array();
+
+    for (const auto &child: node->children) {
+        j["children"].push_back(build_json_from_tree(child, total_size));
+    }
+
+    return j;
 }
 
 } // namespace
 
 namespace reporting {
 
-void print_relative(const std::unique_ptr<FileNode> &node, uintmax_t total_size, int depth)
+void print_relative(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size, int depth)
 {
     print(node, depth, total_size);
     depth++;
@@ -135,7 +182,7 @@ void print_relative(const std::unique_ptr<FileNode> &node, uintmax_t total_size,
     }
 }
 
-void print_absolute(const std::unique_ptr<FileNode> &node, int depth)
+void print_absolute(const std::unique_ptr<filenode::FileNode> &node, int depth)
 {
     print(node, depth);
     depth++;
@@ -148,7 +195,7 @@ void print_absolute(const std::unique_ptr<FileNode> &node, int depth)
     }
 }
 
-void print_relative_dirs(const std::unique_ptr<FileNode> &node, uintmax_t total_size, int depth)
+void print_relative_dirs(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size, int depth)
 {
     print_dirs_only(node, depth, total_size);
     depth++;
@@ -161,7 +208,7 @@ void print_relative_dirs(const std::unique_ptr<FileNode> &node, uintmax_t total_
     }
 }
 
-void print_absolute_dirs(const std::unique_ptr<FileNode> &node, int depth)
+void print_absolute_dirs(const std::unique_ptr<filenode::FileNode> &node, int depth)
 {
     print_dirs_only(node, depth);
     depth++;
@@ -172,6 +219,18 @@ void print_absolute_dirs(const std::unique_ptr<FileNode> &node, int depth)
         }
         print_absolute_dirs(child, depth);
     }
+}
+
+void print_json(const std::unique_ptr<filenode::FileNode> &node)
+{
+    nlohmann::json json = build_json_from_tree(node);
+    fmt::print("{}\n", json.dump(params::INDENT_LEVEL));
+}
+
+void print_json(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size)
+{
+    nlohmann::json json = build_json_from_tree(node, total_size);
+    fmt::print("{}\n", json.dump(params::INDENT_LEVEL));
 }
 
 } // namespace reporting

@@ -2,8 +2,7 @@
 
 #include "filenode.hpp"
 #include "params.hpp"
-#include "report_json.hpp"
-#include "report_pretty.hpp"
+#include "reporting.hpp"
 #include "utils.hpp"
 
 #include <filesystem>
@@ -21,7 +20,7 @@ struct Stats {
     uintmax_t total_size = 0;
 };
 
-void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stats, int depth = 0)
+void precompute_dir_layout(const std::string &dir, filenode::FileNode &parent, Stats &stats, int depth = 0)
 {
     depth++;
     uintmax_t dir_size = 0;
@@ -29,11 +28,11 @@ void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stat
     for (auto const &entry: fs::directory_iterator { dir }) {
         std::string filename = entry.path().filename();
 
-        if (params.excludes.contains(filename)) {
+        if (params::EXCLUDES.contains(filename)) {
             continue;
         }
 
-        std::unique_ptr<FileNode> child = std::make_unique<FileNode>(filename);
+        std::unique_ptr<filenode::FileNode> child = std::make_unique<filenode::FileNode>(filename);
 
         if (entry.is_regular_file()) {
             child->set_is_file();
@@ -64,47 +63,65 @@ void precompute_dir_layout(const std::string &dir, FileNode &parent, Stats &stat
     }
 }
 
-} // namespace
-
-void run_tree()
+void print_jsonified_output(const std::unique_ptr<filenode::FileNode> &root, const Stats &stats)
 {
-    auto root = std::make_unique<FileNode>(params.target);
-
-    if (fs::is_directory(params.target)) {
-        root->set_is_directory();
-    }
-
-    Stats stats;
-    precompute_dir_layout(params.target, *root, stats);
-
-    if (params.print_json) {
-        if (params.print_absolute) {
-            reporting::print_json(root);
-        } else {
-            reporting::print_json(root, stats.total_size);
-        }
+    if (params::PRINT_ABSOLUTE) {
+        reporting::print_json(root);
         return;
     }
 
-    if (params.print_absolute && params.print_dirs_only) {
-        reporting::print_absolute_dirs(root);
-    } else if (params.print_absolute && !params.print_dirs_only) {
-        reporting::print_absolute(root);
-    } else if (!params.print_absolute && params.print_dirs_only) {
-        reporting::print_relative_dirs(root, stats.total_size);
+    reporting::print_json(root, stats.total_size);
+}
+
+void print_pretty_output(const std::unique_ptr<filenode::FileNode> &root, const Stats &stats)
+{
+    if (params::PRINT_ABSOLUTE) {
+        if (params::PRINT_DIRS_ONLY) {
+            reporting::print_absolute_dirs(root);
+        } else {
+            reporting::print_absolute(root);
+        }
     } else {
-        reporting::print_relative(root, stats.total_size);
+        if (params::PRINT_DIRS_ONLY) {
+            reporting::print_relative_dirs(root, stats.total_size);
+        } else {
+            reporting::print_relative(root, stats.total_size);
+        }
     }
 
     fmt::print("\n");
 
-    if (params.print_bytes) {
+    if (params::PRINT_BYTES) {
         fmt::print("Total size: {}\n", stats.total_size);
     } else {
-        fmt::print("Total size: {}\n", bytes_to_human(stats.total_size));
+        fmt::print("Total size: {}\n", utils::bytes_to_human(stats.total_size));
     }
 
     fmt::print("Number of directories: {}\n", stats.num_directories);
     fmt::print("Number of files: {}\n", stats.num_files);
     fmt::print("Number of other file-like objects: {}\n", stats.num_other);
 }
+
+} // namespace
+
+namespace tree {
+
+void run_tree()
+{
+    auto root = std::make_unique<filenode::FileNode>(params::TARGET);
+
+    if (fs::is_directory(params::TARGET)) {
+        root->set_is_directory();
+    }
+
+    Stats stats;
+    precompute_dir_layout(params::TARGET, *root, stats);
+
+    if (params::PRINT_JSON) {
+        print_jsonified_output(root, stats);
+    } else {
+        print_pretty_output(root, stats);
+    }
+}
+
+} // namespace tree

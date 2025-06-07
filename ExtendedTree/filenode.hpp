@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+namespace filenode {
+
 enum FileType {
     REGULAR_FILE,
     DIRECTORY,
@@ -13,8 +15,8 @@ enum FileType {
 
 class FileNode {
 private:
-    FileType filetype = REGULAR_FILE;
-    std::optional<uintmax_t> filesize = std::nullopt;
+    FileType filetype_ = REGULAR_FILE;
+    std::optional<uintmax_t> filesize_ = std::nullopt;
 
 public:
     std::string filename;
@@ -31,3 +33,5 @@ public:
     bool is_directory();
     bool is_other();
 };
+
+} // namespace filenode
