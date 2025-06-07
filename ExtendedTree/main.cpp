@@ -11,8 +11,6 @@
 #include <string>
 #include <unistd.h>
 
-TreeParams params;
-
 namespace fs = std::filesystem;
 
 void print_help_messages()
