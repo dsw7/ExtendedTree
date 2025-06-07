@@ -63,16 +63,6 @@ void precompute_dir_layout(const std::string &dir, filenode::FileNode &parent, S
     }
 }
 
-void print_jsonified_output(const std::unique_ptr<filenode::FileNode> &root, const Stats &stats)
-{
-    if (params::PRINT_ABSOLUTE) {
-        reporting::print_json(root);
-        return;
-    }
-
-    reporting::print_json(root, stats.total_size);
-}
-
 void print_pretty_output(const std::unique_ptr<filenode::FileNode> &root, const Stats &stats)
 {
     if (params::PRINT_DIRS_ONLY) {
@@ -110,7 +100,7 @@ void run_tree()
     precompute_dir_layout(params::TARGET, *root, stats);
 
     if (params::PRINT_JSON) {
-        print_jsonified_output(root, stats);
+        reporting::print_json(root, stats.total_size);
     } else {
         print_pretty_output(root, stats);
     }

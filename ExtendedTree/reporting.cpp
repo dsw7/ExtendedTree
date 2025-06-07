@@ -90,29 +90,6 @@ void print_dirs_only(const std::unique_ptr<filenode::FileNode> &node, int depth,
     }
 }
 
-nlohmann::json build_json_from_tree(const std::unique_ptr<filenode::FileNode> &node)
-{
-    nlohmann::json j;
-
-    j["filename"] = node->filename;
-
-    if (node->is_file()) {
-        j["filesize"] = node->get_filesize();
-    } else if (node->is_directory()) {
-        j["filesize"] = node->get_filesize();
-    } else {
-        j["filesize"] = nullptr;
-    }
-
-    j["children"] = nlohmann::json::array();
-
-    for (const auto &child: node->children) {
-        j["children"].push_back(build_json_from_tree(child));
-    }
-
-    return j;
-}
-
 nlohmann::json build_json_from_tree(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size)
 {
     nlohmann::json j;
@@ -120,11 +97,14 @@ nlohmann::json build_json_from_tree(const std::unique_ptr<filenode::FileNode> &n
     j["filename"] = node->filename;
 
     if (node->is_file()) {
-        j["filesize"] = utils::compute_relative_usage(node->get_filesize(), total_size);
+        j["filesize"] = node->get_filesize();
+        j["usage"] = utils::compute_relative_usage(node->get_filesize(), total_size);
     } else if (node->is_directory()) {
-        j["filesize"] = utils::compute_relative_usage(node->get_filesize(), total_size);
+        j["filesize"] = node->get_filesize();
+        j["usage"] = utils::compute_relative_usage(node->get_filesize(), total_size);
     } else {
         j["filesize"] = nullptr;
+        j["usage"] = nullptr;
     }
 
     j["children"] = nlohmann::json::array();
@@ -164,12 +144,6 @@ void print_pretty_output_dirs_only(const std::unique_ptr<filenode::FileNode> &no
         }
         print_pretty_output_dirs_only(child, total_size, depth);
     }
-}
-
-void print_json(const std::unique_ptr<filenode::FileNode> &node)
-{
-    nlohmann::json json = build_json_from_tree(node);
-    fmt::print("{}\n", json.dump(params::INDENT_LEVEL));
 }
 
 void print_json(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size)
