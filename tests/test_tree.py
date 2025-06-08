@@ -238,3 +238,14 @@ class TestValidReporting(TestTree):
         self.assertEqual(len(usages[2]), 3)
         for i in range(3):
             self.assertAlmostEqual(usages[2][i], 11.1111, places=4)
+
+    def test_level(self) -> None:
+        process = run_subprocess([self.test_dir, "-j -1", "-L1"])
+        self.assertEqual(process.exit_code, 0)
+
+        stdout: Tree = loads(process.stdout)
+        layers = Layers(filesize={}, usage={})
+        traverse_level_order(stdout, layers)
+
+        filesizes = layers["filesize"]
+        self.assertDictEqual(filesizes, {0: [27], 1: [9, 9, 9]})
