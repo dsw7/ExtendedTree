@@ -20,18 +20,13 @@ struct Stats {
     uintmax_t total_size = 0;
 };
 
-void precompute_dir_layout(const std::string &dir, filenode::FileNode &parent, Stats &stats, int depth = 0)
+void discover_layout(const std::string &dir, filenode::FileNode &parent, Stats &stats, int depth = 0)
 {
     depth++;
     uintmax_t dir_size = 0;
 
     for (auto const &entry: fs::directory_iterator { dir }) {
         std::string filename = entry.path().filename();
-
-        if (params::EXCLUDES.contains(filename)) {
-            continue;
-        }
-
         std::unique_ptr<filenode::FileNode> child = std::make_unique<filenode::FileNode>(filename);
 
         if (entry.is_regular_file()) {
@@ -49,7 +44,7 @@ void precompute_dir_layout(const std::string &dir, filenode::FileNode &parent, S
         }
 
         if (child->is_directory()) {
-            precompute_dir_layout(entry.path().string(), *child, stats, depth);
+            discover_layout(entry.path().string(), *child, stats, depth);
             dir_size += child->get_filesize();
         } else if (child->is_file()) {
             dir_size += child->get_filesize();
@@ -97,7 +92,7 @@ void run_tree()
     }
 
     Stats stats;
-    precompute_dir_layout(params::TARGET, *root, stats);
+    discover_layout(params::TARGET, *root, stats);
 
     if (params::PRINT_JSON) {
         reporting::print_json(root, stats.total_size);
