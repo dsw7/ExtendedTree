@@ -65,7 +65,7 @@ void print_relative_usage(uintmax_t size, uintmax_t total_size)
     }
 }
 
-void print(const std::unique_ptr<filenode::FileNode> &node, int depth, uintmax_t total_size)
+void print_dirs_files_or_other(const std::unique_ptr<filenode::FileNode> &node, int depth, uintmax_t total_size)
 {
     cache_whitespace(depth);
 
@@ -110,6 +110,9 @@ nlohmann::json build_json_from_tree(const std::unique_ptr<filenode::FileNode> &n
     j["children"] = nlohmann::json::array();
 
     for (const auto &child: node->children) {
+        if (params::EXCLUDES.contains(child->filename)) {
+            continue;
+        }
         j["children"].push_back(build_json_from_tree(child, total_size));
     }
 
@@ -122,11 +125,15 @@ namespace reporting {
 
 void print_pretty_output(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size, int depth)
 {
-    print(node, depth, total_size);
+    print_dirs_files_or_other(node, depth, total_size);
     depth++;
 
     for (const auto &child: node->children) {
         if (skip_level(depth)) {
+            continue;
+        }
+
+        if (params::EXCLUDES.contains(child->filename)) {
             continue;
         }
         print_pretty_output(child, total_size, depth);
@@ -140,6 +147,10 @@ void print_pretty_output_dirs_only(const std::unique_ptr<filenode::FileNode> &no
 
     for (const auto &child: node->children) {
         if (skip_level(depth)) {
+            continue;
+        }
+
+        if (params::EXCLUDES.contains(child->filename)) {
             continue;
         }
         print_pretty_output_dirs_only(child, total_size, depth);
