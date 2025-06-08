@@ -43,5 +43,11 @@ class TestMemory(TestTree):
     def test_json(self) -> None:
         run_valgrind([self.test_dir, "-j -1"])
 
+    def test_json_with_level(self) -> None:
+        run_valgrind([self.test_dir, "-j1", "-L1"])
+
+    def test_json_with_exclude(self) -> None:
+        run_valgrind([self.test_dir, "-j1", "-Ifoo"])
+
     def test_dirs_only(self) -> None:
         run_valgrind([self.test_dir, "-d"])
