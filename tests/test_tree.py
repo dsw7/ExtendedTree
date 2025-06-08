@@ -86,8 +86,8 @@ class TestCommandLine(TestTree):
         process = run_subprocess([self.test_dir, "-Ifoo"])
         self.assertEqual(process.exit_code, 0)
         self.assertNotRegex(process.stdout, "foo")
-        self.assertRegex(process.stdout, r"bar/.*\[ 9 bytes, 50\.00% \]")
-        self.assertRegex(process.stdout, r"baz/.*\[ 9 bytes, 50\.00% \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 9 bytes, 33\.33% \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 9 bytes, 33\.33% \]")
 
     def test_dirs_only(self) -> None:
         process = run_subprocess([self.test_dir, "-d"])
@@ -101,8 +101,8 @@ class TestCommandLine(TestTree):
         process = run_subprocess([self.test_dir, "-d", "-Ifoo"])
         self.assertEqual(process.exit_code, 0)
         self.assertNotRegex(process.stdout, "foo")
-        self.assertRegex(process.stdout, r"bar/.*\[ 9 bytes, 50\.00% \]")
-        self.assertRegex(process.stdout, r"baz/.*\[ 9 bytes, 50\.00% \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 9 bytes, 33\.33% \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 9 bytes, 33\.33% \]")
         self.assertNotRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
 
     def test_dirs_only_human_readable(self) -> None:
@@ -134,8 +134,8 @@ class TestCommandLine(TestTree):
         self.assertEqual(process.exit_code, 0)
         self.assertNotRegex(process.stdout, "foo")
         self.assertNotRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
-        self.assertRegex(process.stdout, r"bar/.*\[ 9, 50\.00% \]")
-        self.assertRegex(process.stdout, r"baz/.*\[ 9, 50\.00% \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 9, 33\.33% \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 9, 33\.33% \]")
 
     def test_exclude_multiple(self) -> None:
         process = run_subprocess([self.test_dir, "-Ifoo", "-Ibar", "-Ibaz"])
@@ -186,7 +186,7 @@ class TestValidReporting(TestTree):
         traverse_level_order(stdout, layers)
 
         filesizes = layers["filesize"]
-        self.assertListEqual(filesizes[0], [18])
+        self.assertListEqual(filesizes[0], [27])
         self.assertListEqual(filesizes[1], [9, 9])
         self.assertListEqual(filesizes[2], [3, 3, 3, 3, 3, 3])
 
@@ -204,10 +204,10 @@ class TestValidReporting(TestTree):
         self.assertEqual(len(usages[2]), 6)
 
         for i in range(2):
-            self.assertAlmostEqual(usages[1][i], 50.0, places=4)
+            self.assertAlmostEqual(usages[1][i], 33.3333, places=4)
 
         for i in range(6):
-            self.assertAlmostEqual(usages[2][i], 16.6667, places=4)
+            self.assertAlmostEqual(usages[2][i], 11.1111, places=4)
 
     def test_filesizes_with_exclude_2(self) -> None:
         process = run_subprocess([self.test_dir, "-j -1", "-Ifoo", "-Ibar"])
@@ -218,7 +218,7 @@ class TestValidReporting(TestTree):
         traverse_level_order(stdout, layers)
 
         filesizes = layers["filesize"]
-        self.assertListEqual(filesizes[0], [9])
+        self.assertListEqual(filesizes[0], [27])
         self.assertListEqual(filesizes[1], [9])
         self.assertListEqual(filesizes[2], [3, 3, 3])
 
@@ -233,10 +233,8 @@ class TestValidReporting(TestTree):
         usages = layers["usage"]
         self.assertListEqual(usages[0], [100.0])
         self.assertEqual(len(usages[1]), 1)
+        self.assertAlmostEqual(usages[1][0], 33.3333, places=4)
+
         self.assertEqual(len(usages[2]), 3)
-
-        for i in range(1):
-            self.assertAlmostEqual(usages[1][i], 100.0, places=4)
-
         for i in range(3):
-            self.assertAlmostEqual(usages[2][i], 33.3333, places=4)
+            self.assertAlmostEqual(usages[2][i], 11.1111, places=4)
