@@ -90,8 +90,9 @@ void print_dirs_only(const std::unique_ptr<filenode::FileNode> &node, int depth,
     }
 }
 
-nlohmann::json build_json_from_tree(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size)
+nlohmann::json build_json_from_tree(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size, int depth = 0)
 {
+    depth++;
     nlohmann::json j;
 
     j["filename"] = node->filename;
@@ -110,10 +111,14 @@ nlohmann::json build_json_from_tree(const std::unique_ptr<filenode::FileNode> &n
     j["children"] = nlohmann::json::array();
 
     for (const auto &child: node->children) {
+        if (skip_level(depth)) {
+            continue;
+        }
+
         if (params::EXCLUDES.contains(child->filename)) {
             continue;
         }
-        j["children"].push_back(build_json_from_tree(child, total_size));
+        j["children"].push_back(build_json_from_tree(child, total_size, depth));
     }
 
     return j;
