@@ -9,7 +9,7 @@ This command displays relative disk usage for a directory tree. For example, sup
 tree bar
 ```
 Which returns:
-```
+```console
 bar/
 ├── bar/
 │   ├── a.txt
@@ -29,19 +29,19 @@ And suppose that `{a,b,c}.txt` all contain 3 bytes. The ExtendedTree equivalent:
 etree bar
 ```
 Will return:
-```
-bar/ [ 100.00% ]
-    baz/ [ 33.33% ]
-        a.txt [ 11.11% ]
-        b.txt [ 11.11% ]
-        c.txt [ 11.11% ]
-    foo/ [ 33.33% ]
-        a.txt [ 11.11% ]
-        b.txt [ 11.11% ]
-        c.txt [ 11.11% ]
-    bar/ [ 33.33% ]
-        a.txt [ 11.11% ]
-        b.txt [ 11.11% ]
-        c.txt [ 11.11% ]
+```console
+└── bar/ [ 27 bytes, 100.00% ]
+    ├── baz/ [ 9 bytes, 33.33% ]
+    │   ├── a.txt [ 3 bytes, 11.11% ]
+    │   ├── b.txt [ 3 bytes, 11.11% ]
+    │   └── c.txt [ 3 bytes, 11.11% ]
+    ├── foo/ [ 9 bytes, 33.33% ]
+    │   ├── a.txt [ 3 bytes, 11.11% ]
+    │   ├── b.txt [ 3 bytes, 11.11% ]
+    │   └── c.txt [ 3 bytes, 11.11% ]
+    └── bar/ [ 9 bytes, 33.33% ]
+        ├── a.txt [ 3 bytes, 11.11% ]
+        ├── b.txt [ 3 bytes, 11.11% ]
+        └── c.txt [ 3 bytes, 11.11% ]
 ```
 Note that this calculation is based on the file size itself and not on block size.
