@@ -6,12 +6,9 @@
 #include <fmt/color.h>
 #include <fmt/core.h>
 #include <json.hpp>
-#include <map>
 #include <string>
 
 namespace {
-
-std::map<int, std::string> WHITESPACE;
 
 constexpr fmt::terminal_color blue = fmt::terminal_color::bright_blue;
 constexpr fmt::terminal_color cyan = fmt::terminal_color::bright_cyan;
@@ -30,15 +27,6 @@ bool skip_level(int depth)
     return false;
 }
 
-void cache_whitespace(int depth)
-{
-    if (WHITESPACE.contains(depth)) {
-        return;
-    }
-
-    WHITESPACE.emplace(depth, std::string(depth * TAB_WIDTH, ' '));
-}
-
 void append_usage(std::string &line, uintmax_t size, uintmax_t total_size)
 {
     float relative_size = utils::compute_relative_usage(size, total_size);
@@ -50,44 +38,40 @@ void append_usage(std::string &line, uintmax_t size, uintmax_t total_size)
     }
 }
 
-void print_file(const std::unique_ptr<filenode::FileNode> &node, int depth, uintmax_t total_size)
+void print_file(const std::unique_ptr<filenode::FileNode> &node, const std::string &prefix, uintmax_t total_size)
 {
-    std::string line = fmt::format("{}{} ", WHITESPACE[depth], node->filename);
+    std::string line = fmt::format("{}{} ", prefix, node->filename);
     append_usage(line, node->get_filesize(), total_size);
     fmt::print("{}\n", line);
 }
 
-void print_directory(const std::unique_ptr<filenode::FileNode> &node, int depth, uintmax_t total_size)
+void print_directory(const std::unique_ptr<filenode::FileNode> &node, const std::string &prefix, uintmax_t total_size)
 {
-    std::string line = fmt::format(fg(blue), "{}{}/ ", WHITESPACE[depth], node->filename);
+    std::string line = fmt::format(fg(blue), "{}{}/ ", prefix, node->filename);
     append_usage(line, node->get_filesize(), total_size);
     fmt::print("{}\n", line);
 }
 
-void print_other(const std::string &filename, int depth)
+void print_other(const std::string &filename, const std::string &prefix)
 {
-    fmt::print(fg(cyan), "{}{} ?\n", WHITESPACE[depth], filename);
+    fmt::print(fg(cyan), "{}{} ?\n", prefix, filename);
 }
 
-void print_dirs_files_or_other(const std::unique_ptr<filenode::FileNode> &node, int depth, uintmax_t total_size)
+void print_dirs_files_or_other(const std::unique_ptr<filenode::FileNode> &node, const std::string &prefix, uintmax_t total_size)
 {
-    cache_whitespace(depth);
-
     if (node->is_file()) {
-        print_file(node, depth, total_size);
+        print_file(node, prefix, total_size);
     } else if (node->is_directory()) {
-        print_directory(node, depth, total_size);
+        print_directory(node, prefix, total_size);
     } else {
-        print_other(node->filename, depth);
+        print_other(node->filename, prefix);
     }
 }
 
-void print_dirs_only(const std::unique_ptr<filenode::FileNode> &node, int depth, uintmax_t total_size)
+void print_dirs_only(const std::unique_ptr<filenode::FileNode> &node, const std::string &prefix, uintmax_t total_size)
 {
-    cache_whitespace(depth);
-
     if (node->is_directory()) {
-        print_directory(node, depth, total_size);
+        print_directory(node, prefix, total_size);
     }
 }
 
@@ -131,7 +115,8 @@ namespace reporting {
 
 void print_pretty_output(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size, int depth)
 {
-    print_dirs_files_or_other(node, depth, total_size);
+    std::string prefix = " + ";
+    print_dirs_files_or_other(node, prefix, total_size);
     depth++;
 
     for (const auto &child: node->children) {
@@ -148,7 +133,8 @@ void print_pretty_output(const std::unique_ptr<filenode::FileNode> &node, uintma
 
 void print_pretty_output_dirs_only(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size, int depth)
 {
-    print_dirs_only(node, depth, total_size);
+    std::string prefix = " + ";
+    print_dirs_only(node, prefix, total_size);
     depth++;
 
     for (const auto &child: node->children) {
