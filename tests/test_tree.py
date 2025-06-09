@@ -197,12 +197,22 @@ class TestValidReporting(TestTree):
         self.assertEqual(subchild["filesize"], 3)
         self.assertAlmostEqual(subchild["usage"], 11.1111, places=4)
 
-    def test_level(self) -> None:
+    def test_json_with_level(self) -> None:
         process = run_subprocess([self.test_dir, "-j -1", "-L1"])
         self.assertEqual(process.exit_code, 0)
 
-        stdout: Tree = loads(process.stdout)
-        layers = Layers(filesize={}, usage={})
-        traverse_level_order(stdout, layers)
+        json = loads(process.stdout)
+        self.assertEqual(json["dirname"], "/tmp/etree_test")
+        self.assertEqual(json["filecount"], 9)
+        self.assertEqual(json["filesize"], 27)
+        self.assertEqual(json["usage"], 100)
 
-        self.assertDictEqual(layers["filesize"], {0: [27], 1: [9, 9, 9]})
+        self.assertEqual(len(json["children"]), 3)
+
+        child = json["children"][0]
+        self.assertIn(child["dirname"], {"foo", "bar", "baz"})
+        self.assertEqual(child["filecount"], 3)
+        self.assertEqual(child["filesize"], 9)
+        self.assertAlmostEqual(child["usage"], 33.3333, places=4)
+
+        self.assertEqual(len(child["children"]), 0)
