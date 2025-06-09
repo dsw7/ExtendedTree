@@ -54,14 +54,14 @@ void print_file(const std::unique_ptr<filenode::FileNode> &node, int depth, uint
 {
     std::string line = fmt::format("{}{} ", WHITESPACE[depth], node->filename);
     append_usage(line, node->get_filesize(), total_size);
-    fmt::print(" {}\n", line);
+    fmt::print("{}\n", line);
 }
 
 void print_directory(const std::unique_ptr<filenode::FileNode> &node, int depth, uintmax_t total_size)
 {
     std::string line = fmt::format(fg(blue), "{}{}/ ", WHITESPACE[depth], node->filename);
     append_usage(line, node->get_filesize(), total_size);
-    fmt::print(" {}\n", line);
+    fmt::print("{}\n", line);
 }
 
 void print_other(const std::string &filename, int depth)
