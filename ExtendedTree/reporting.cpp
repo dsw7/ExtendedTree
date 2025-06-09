@@ -93,6 +93,10 @@ namespace reporting {
 
 void print_pretty_output(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size, int depth, const std::string &prefix, bool is_last)
 {
+    if (params::EXCLUDES.contains(node->filename)) {
+        return;
+    }
+
     std::string next_prefix;
     std::string line = prefix;
 
@@ -124,15 +128,16 @@ void print_pretty_output(const std::unique_ptr<filenode::FileNode> &node, uintma
     size_t num_children = node->children.size();
 
     for (size_t i = 0; i < num_children; ++i) {
-        if (params::EXCLUDES.contains(node->children[i]->filename)) {
-            continue;
-        }
         print_pretty_output(node->children[i], total_size, depth, next_prefix, i == num_children - 1);
     }
 }
 
 void print_pretty_output_dirs_only(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size, int depth, const std::string &prefix, bool is_last)
 {
+    if (params::EXCLUDES.contains(node->filename)) {
+        return;
+    }
+
     std::string next_prefix;
 
     if (node->is_directory()) {
@@ -161,9 +166,6 @@ void print_pretty_output_dirs_only(const std::unique_ptr<filenode::FileNode> &no
     size_t num_children = node->children.size();
 
     for (size_t i = 0; i < num_children; ++i) {
-        if (params::EXCLUDES.contains(node->children[i]->filename)) {
-            continue;
-        }
         print_pretty_output_dirs_only(node->children[i], total_size, depth, next_prefix, i == num_children - 1);
     }
 }
