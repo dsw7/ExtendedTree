@@ -1,20 +1,7 @@
 from dataclasses import dataclass
 from json import loads
-from typing import TypedDict, Iterable
 from subprocess import run, PIPE
 from .base import TestTree, get_path_to_etree_binary
-
-
-class Layers(TypedDict):
-    filesize: dict[int, list[int]]
-    usage: dict[int, list[float]]
-
-
-class Tree(TypedDict):
-    children: Iterable["Tree"]
-    filename: str
-    filesize: int
-    usage: float
 
 
 @dataclass
@@ -33,22 +20,6 @@ def run_subprocess(args: list[str]) -> Process:
         stdout=process.stdout.decode(),
         stderr=process.stderr.decode(),
     )
-
-
-def traverse_level_order(stdout: Tree, layers: Layers, depth: int = 0) -> None:
-    if depth not in layers["filesize"]:
-        layers["filesize"][depth] = []
-
-    if depth not in layers["usage"]:
-        layers["usage"][depth] = []
-
-    layers["filesize"][depth].append(stdout["filesize"])
-    layers["usage"][depth].append(stdout["usage"])
-
-    depth += 1
-
-    for child in stdout["children"]:
-        traverse_level_order(child, layers, depth)
 
 
 class TestCommandLine(TestTree):
