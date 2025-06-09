@@ -17,6 +17,16 @@ uintmax_t FileNode::get_filesize()
     return this->filesize_.value_or(0);
 }
 
+void FileNode::set_filecount(uintmax_t filecount)
+{
+    this->filecount_ = filecount;
+}
+
+uintmax_t FileNode::get_filecount()
+{
+    return this->filecount_.value_or(0);
+}
+
 void FileNode::set_is_file()
 {
     this->filetype_ = REGULAR_FILE;
