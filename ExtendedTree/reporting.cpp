@@ -69,15 +69,17 @@ nlohmann::json build_json_from_tree(const std::unique_ptr<filenode::FileNode> &n
     depth++;
     nlohmann::json j;
 
-    j["filename"] = node->filename;
-
     if (node->is_file()) {
+        j["filename"] = node->filename;
         j["filesize"] = node->get_filesize();
         j["usage"] = utils::compute_relative_usage(node->get_filesize(), total_size);
     } else if (node->is_directory()) {
+        j["dirname"] = node->filename;
+        j["filecount"] = node->get_filecount();
         j["filesize"] = node->get_filesize();
         j["usage"] = utils::compute_relative_usage(node->get_filesize(), total_size);
     } else {
+        j["filename"] = node->filename;
         j["filesize"] = nullptr;
         j["usage"] = nullptr;
     }
