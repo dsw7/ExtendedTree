@@ -50,6 +50,8 @@ void discover_layout(const std::string &dir, filenode::FileNode &parent, Stats &
         } else if (child->is_file()) {
             dir_size += child->get_filesize();
             filecount++;
+        } else if (child->is_other()) {
+            filecount++;
         }
 
         parent.children.push_back(std::move(child));
