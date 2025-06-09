@@ -171,27 +171,31 @@ class TestValidReporting(TestTree):
         self.assertEqual(subchild["filesize"], 3)
         self.assertAlmostEqual(subchild["usage"], 11.1111, places=4)
 
-    def test_filesizes_with_exclude(self) -> None:
-        process = run_subprocess([self.test_dir, "-j -1", "-Ifoo"])
-        self.assertEqual(process.exit_code, 0)
-
-        stdout: Tree = loads(process.stdout)
-        layers = Layers(filesize={}, usage={})
-        traverse_level_order(stdout, layers)
-
-        self.assertDictEqual(
-            layers["filesize"], {0: [27], 1: [9, 9], 2: [3, 3, 3, 3, 3, 3]}
-        )
-
-    def test_filesizes_with_exclude_2(self) -> None:
+    def test_json_with_excludes(self) -> None:
         process = run_subprocess([self.test_dir, "-j -1", "-Ifoo", "-Ibar"])
         self.assertEqual(process.exit_code, 0)
 
-        stdout: Tree = loads(process.stdout)
-        layers = Layers(filesize={}, usage={})
-        traverse_level_order(stdout, layers)
+        json = loads(process.stdout)
+        self.assertEqual(json["dirname"], "/tmp/etree_test")
+        self.assertEqual(json["filecount"], 9)
+        self.assertEqual(json["filesize"], 27)
+        self.assertEqual(json["usage"], 100)
 
-        self.assertDictEqual(layers["filesize"], {0: [27], 1: [9], 2: [3, 3, 3]})
+        self.assertEqual(len(json["children"]), 1)
+
+        child = json["children"][0]
+        self.assertEqual(child["dirname"], "baz")
+        self.assertEqual(child["filecount"], 3)
+        self.assertEqual(child["filesize"], 9)
+        self.assertAlmostEqual(child["usage"], 33.3333, places=4)
+
+        self.assertEqual(len(child["children"]), 3)
+
+        subchild = child["children"][0]
+        self.assertIn(subchild["filename"], {"a.txt", "b.txt", "c.txt"})
+        self.assertNotIn("filecount", subchild)
+        self.assertEqual(subchild["filesize"], 3)
+        self.assertAlmostEqual(subchild["usage"], 11.1111, places=4)
 
     def test_level(self) -> None:
         process = run_subprocess([self.test_dir, "-j -1", "-L1"])
