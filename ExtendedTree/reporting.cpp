@@ -134,21 +134,24 @@ void print_pretty_output(const std::unique_ptr<filenode::FileNode> &node, uintma
     }
 }
 
-void print_pretty_output_dirs_only(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size, int depth)
+void print_pretty_output_dirs_only(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size, int depth, const std::string &prefix, bool is_last)
 {
-    std::string prefix = " + ";
-    print_dirs_only(node, prefix, total_size);
+    fmt::print("{}", prefix);
+    fmt::print("{}", (is_last ? "└── " : "├── "));
+    print_dirs_only(node, "", total_size);
     depth++;
 
-    for (const auto &child: node->children) {
+    std::string next_prefix = prefix + (is_last ? "    " : "│   ");
+
+    for (size_t i = 0; i < node->children.size(); ++i) {
         if (skip_level(depth)) {
             continue;
         }
 
-        if (params::EXCLUDES.contains(child->filename)) {
+        if (params::EXCLUDES.contains(node->children[i]->filename)) {
             continue;
         }
-        print_pretty_output_dirs_only(child, total_size, depth);
+        print_pretty_output_dirs_only(node->children[i], total_size, depth, next_prefix, i == node->children.size() - 1);
     }
 }
 
