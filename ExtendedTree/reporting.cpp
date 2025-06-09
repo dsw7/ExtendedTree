@@ -39,27 +39,29 @@ void cache_whitespace(int depth)
     WHITESPACE.emplace(depth, std::string(depth * TAB_WIDTH, ' '));
 }
 
-void print_relative_usage(uintmax_t size, uintmax_t total_size)
+void append_usage(std::string &line, uintmax_t size, uintmax_t total_size)
 {
     float relative_size = utils::compute_relative_usage(size, total_size);
 
     if (params::PRINT_HUMAN_READABLE) {
-        fmt::print(fg(green), "[ {}, {:.{}f}% ]\n", utils::bytes_to_human(size), relative_size, 2);
+        line += fmt::format(fg(green), "[ {}, {:.{}f}% ]", utils::bytes_to_human(size), relative_size, 2);
     } else {
-        fmt::print(fg(green), "[ {} bytes, {:.{}f}% ]\n", size, relative_size, 2);
+        line += fmt::format(fg(green), "[ {} bytes, {:.{}f}% ]", size, relative_size, 2);
     }
 }
 
 void print_file(const std::unique_ptr<filenode::FileNode> &node, int depth, uintmax_t total_size)
 {
-    fmt::print("{}{} ", WHITESPACE[depth], node->filename);
-    print_relative_usage(node->get_filesize(), total_size);
+    std::string line = fmt::format("{}{} ", WHITESPACE[depth], node->filename);
+    append_usage(line, node->get_filesize(), total_size);
+    fmt::print(" {}\n", line);
 }
 
 void print_directory(const std::unique_ptr<filenode::FileNode> &node, int depth, uintmax_t total_size)
 {
-    fmt::print(fg(blue), "{}{}/ ", WHITESPACE[depth], node->filename);
-    print_relative_usage(node->get_filesize(), total_size);
+    std::string line = fmt::format(fg(blue), "{}{}/ ", WHITESPACE[depth], node->filename);
+    append_usage(line, node->get_filesize(), total_size);
+    fmt::print(" {}\n", line);
 }
 
 void print_other(const std::string &filename, int depth)
