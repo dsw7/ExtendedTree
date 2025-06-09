@@ -6,12 +6,9 @@
 #include <fmt/color.h>
 #include <fmt/core.h>
 #include <json.hpp>
-#include <map>
 #include <string>
 
 namespace {
-
-std::map<int, std::string> WHITESPACE;
 
 constexpr fmt::terminal_color blue = fmt::terminal_color::bright_blue;
 constexpr fmt::terminal_color cyan = fmt::terminal_color::bright_cyan;
@@ -30,63 +27,29 @@ bool skip_level(int depth)
     return false;
 }
 
-void cache_whitespace(int depth)
+void append_file(std::string &line, const std::string &filename)
 {
-    if (WHITESPACE.contains(depth)) {
-        return;
-    }
-
-    WHITESPACE.emplace(depth, std::string(depth * TAB_WIDTH, ' '));
+    line += fmt::format("{} ", filename);
 }
 
-void print_file(const std::string &filename, int depth)
+void append_directory(std::string &line, const std::string &filename)
 {
-    fmt::print("{}{} ", WHITESPACE[depth], filename);
+    line += fmt::format(fg(blue), "{}/ ", filename);
 }
 
-void print_directory(const std::string &filename, int depth)
+void append_other(std::string &line, const std::string &filename)
 {
-    fmt::print(fg(blue), "{}{}/ ", WHITESPACE[depth], filename);
+    line += fmt::format(fg(cyan), "{} ?", filename);
 }
 
-void print_other(const std::string &filename, int depth)
-{
-    fmt::print(fg(cyan), "{}{} ?\n", WHITESPACE[depth], filename);
-}
-
-void print_relative_usage(uintmax_t size, uintmax_t total_size)
+void append_usage(std::string &line, uintmax_t size, uintmax_t total_size)
 {
     float relative_size = utils::compute_relative_usage(size, total_size);
 
     if (params::PRINT_HUMAN_READABLE) {
-        fmt::print(fg(green), "[ {}, {:.{}f}% ]\n", utils::bytes_to_human(size), relative_size, 2);
+        line += fmt::format(fg(green), "[ {}, {:.{}f}% ]", utils::bytes_to_human(size), relative_size, 2);
     } else {
-        fmt::print(fg(green), "[ {} bytes, {:.{}f}% ]\n", size, relative_size, 2);
-    }
-}
-
-void print_dirs_files_or_other(const std::unique_ptr<filenode::FileNode> &node, int depth, uintmax_t total_size)
-{
-    cache_whitespace(depth);
-
-    if (node->is_file()) {
-        print_file(node->filename, depth);
-        print_relative_usage(node->get_filesize(), total_size);
-    } else if (node->is_directory()) {
-        print_directory(node->filename, depth);
-        print_relative_usage(node->get_filesize(), total_size);
-    } else {
-        print_other(node->filename, depth);
-    }
-}
-
-void print_dirs_only(const std::unique_ptr<filenode::FileNode> &node, int depth, uintmax_t total_size)
-{
-    cache_whitespace(depth);
-
-    if (node->is_directory()) {
-        print_directory(node->filename, depth);
-        print_relative_usage(node->get_filesize(), total_size);
+        line += fmt::format(fg(green), "[ {} bytes, {:.{}f}% ]", size, relative_size, 2);
     }
 }
 
@@ -128,37 +91,82 @@ nlohmann::json build_json_from_tree(const std::unique_ptr<filenode::FileNode> &n
 
 namespace reporting {
 
-void print_pretty_output(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size, int depth)
+void print_pretty_output(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size, int depth, const std::string &prefix, bool is_last)
 {
-    print_dirs_files_or_other(node, depth, total_size);
+    if (params::EXCLUDES.contains(node->filename)) {
+        return;
+    }
+
+    std::string next_prefix;
+    std::string line = prefix;
+
+    if (is_last) {
+        line += "└── ";
+        next_prefix = prefix + "    ";
+    } else {
+        line += "├── ";
+        next_prefix = prefix + "│   ";
+    }
+
+    if (node->is_file()) {
+        append_file(line, node->filename);
+        append_usage(line, node->get_filesize(), total_size);
+    } else if (node->is_directory()) {
+        append_directory(line, node->filename);
+        append_usage(line, node->get_filesize(), total_size);
+    } else {
+        append_other(line, node->filename);
+    }
+
+    fmt::print("{}\n", line);
+
     depth++;
+    if (skip_level(depth)) {
+        return;
+    }
 
-    for (const auto &child: node->children) {
-        if (skip_level(depth)) {
-            continue;
-        }
+    size_t num_children = node->children.size();
 
-        if (params::EXCLUDES.contains(child->filename)) {
-            continue;
-        }
-        print_pretty_output(child, total_size, depth);
+    for (size_t i = 0; i < num_children; ++i) {
+        print_pretty_output(node->children[i], total_size, depth, next_prefix, i == num_children - 1);
     }
 }
 
-void print_pretty_output_dirs_only(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size, int depth)
+void print_pretty_output_dirs_only(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size, int depth, const std::string &prefix, bool is_last)
 {
-    print_dirs_only(node, depth, total_size);
+    if (params::EXCLUDES.contains(node->filename)) {
+        return;
+    }
+
+    std::string next_prefix;
+
+    if (node->is_directory()) {
+        std::string line = prefix;
+
+        if (is_last) {
+            line += "└── ";
+            next_prefix = prefix + "    ";
+        } else {
+            line += "├── ";
+            next_prefix = prefix + "│   ";
+        }
+
+        append_directory(line, node->filename);
+        append_usage(line, node->get_filesize(), total_size);
+        fmt::print("{}\n", line);
+    } else {
+        next_prefix = "";
+    }
+
     depth++;
+    if (skip_level(depth)) {
+        return;
+    }
 
-    for (const auto &child: node->children) {
-        if (skip_level(depth)) {
-            continue;
-        }
+    size_t num_children = node->children.size();
 
-        if (params::EXCLUDES.contains(child->filename)) {
-            continue;
-        }
-        print_pretty_output_dirs_only(child, total_size, depth);
+    for (size_t i = 0; i < num_children; ++i) {
+        print_pretty_output_dirs_only(node->children[i], total_size, depth, next_prefix, i == num_children - 1);
     }
 }
 

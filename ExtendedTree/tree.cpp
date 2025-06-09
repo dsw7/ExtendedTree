@@ -20,9 +20,8 @@ struct Stats {
     uintmax_t total_size = 0;
 };
 
-void discover_layout(const std::string &dir, filenode::FileNode &parent, Stats &stats, int depth = 0)
+void discover_layout(const std::string &dir, filenode::FileNode &parent, Stats &stats)
 {
-    depth++;
     uintmax_t dir_size = 0;
 
     for (auto const &entry: fs::directory_iterator { dir }) {
@@ -44,7 +43,7 @@ void discover_layout(const std::string &dir, filenode::FileNode &parent, Stats &
         }
 
         if (child->is_directory()) {
-            discover_layout(entry.path().string(), *child, stats, depth);
+            discover_layout(entry.path().string(), *child, stats);
             dir_size += child->get_filesize();
         } else if (child->is_file()) {
             dir_size += child->get_filesize();
