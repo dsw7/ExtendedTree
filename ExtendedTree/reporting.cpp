@@ -27,6 +27,21 @@ bool skip_level(int depth)
     return false;
 }
 
+void append_file(std::string &line, const std::string &filename)
+{
+    line += fmt::format("{} ", filename);
+}
+
+void append_directory(std::string &line, const std::string &filename)
+{
+    line += fmt::format(fg(blue), "{}/ ", filename);
+}
+
+void append_other(std::string &line, const std::string &filename)
+{
+    line += fmt::format(fg(cyan), "{} ?", filename);
+}
+
 void append_usage(std::string &line, uintmax_t size, uintmax_t total_size)
 {
     float relative_size = utils::compute_relative_usage(size, total_size);
@@ -36,25 +51,6 @@ void append_usage(std::string &line, uintmax_t size, uintmax_t total_size)
     } else {
         line += fmt::format(fg(green), "[ {} bytes, {:.{}f}% ]", size, relative_size, 2);
     }
-}
-
-void print_file(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size)
-{
-    std::string line = fmt::format("{} ", node->filename);
-    append_usage(line, node->get_filesize(), total_size);
-    fmt::print("{}\n", line);
-}
-
-void print_directory(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size)
-{
-    std::string line = fmt::format(fg(blue), "{}/ ", node->filename);
-    append_usage(line, node->get_filesize(), total_size);
-    fmt::print("{}\n", line);
-}
-
-void print_other(const std::string &filename)
-{
-    fmt::print(fg(cyan), "{} ?\n", filename);
 }
 
 nlohmann::json build_json_from_tree(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size, int depth = 0)
@@ -100,14 +96,19 @@ void print_pretty_output(const std::unique_ptr<filenode::FileNode> &node, uintma
     fmt::print("{}", prefix);
     fmt::print("{}", (is_last ? "└── " : "├── "));
 
+    std::string line;
+
     if (node->is_file()) {
-        print_file(node, total_size);
+        append_file(line, node->filename);
+        append_usage(line, node->get_filesize(), total_size);
     } else if (node->is_directory()) {
-        print_directory(node, total_size);
+        append_directory(line, node->filename);
+        append_usage(line, node->get_filesize(), total_size);
     } else {
-        print_other(node->filename);
+        append_other(line, node->filename);
     }
 
+    fmt::print("{}\n", line);
     depth++;
 
     std::string next_prefix = prefix + (is_last ? "    " : "│   ");
@@ -129,10 +130,14 @@ void print_pretty_output_dirs_only(const std::unique_ptr<filenode::FileNode> &no
     fmt::print("{}", prefix);
     fmt::print("{}", (is_last ? "└── " : "├── "));
 
+    std::string line;
+
     if (node->is_directory()) {
-        print_directory(node, total_size);
+        append_directory(line, node->filename);
+        append_usage(line, node->get_filesize(), total_size);
     }
 
+    fmt::print("{}\n", line);
     depth++;
 
     std::string next_prefix = prefix + (is_last ? "    " : "│   ");
