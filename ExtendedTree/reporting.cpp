@@ -115,15 +115,15 @@ void print_pretty_output(const std::unique_ptr<filenode::FileNode> &node, uintma
     }
 
     fmt::print("{}\n", line);
+
     depth++;
+    if (skip_level(depth)) {
+        return;
+    }
 
     size_t num_children = node->children.size();
 
     for (size_t i = 0; i < num_children; ++i) {
-        if (skip_level(depth)) {
-            continue;
-        }
-
         if (params::EXCLUDES.contains(node->children[i]->filename)) {
             continue;
         }
@@ -154,13 +154,13 @@ void print_pretty_output_dirs_only(const std::unique_ptr<filenode::FileNode> &no
     }
 
     depth++;
+    if (skip_level(depth)) {
+        return;
+    }
+
     size_t num_children = node->children.size();
 
     for (size_t i = 0; i < num_children; ++i) {
-        if (skip_level(depth)) {
-            continue;
-        }
-
         if (params::EXCLUDES.contains(node->children[i]->filename)) {
             continue;
         }
