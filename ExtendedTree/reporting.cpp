@@ -38,40 +38,40 @@ void append_usage(std::string &line, uintmax_t size, uintmax_t total_size)
     }
 }
 
-void print_file(const std::unique_ptr<filenode::FileNode> &node, const std::string &prefix, uintmax_t total_size)
+void print_file(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size)
 {
-    std::string line = fmt::format("{}{} ", prefix, node->filename);
+    std::string line = fmt::format("{} ", node->filename);
     append_usage(line, node->get_filesize(), total_size);
     fmt::print("{}\n", line);
 }
 
-void print_directory(const std::unique_ptr<filenode::FileNode> &node, const std::string &prefix, uintmax_t total_size)
+void print_directory(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size)
 {
-    std::string line = fmt::format(fg(blue), "{}{}/ ", prefix, node->filename);
+    std::string line = fmt::format(fg(blue), "{}/ ", node->filename);
     append_usage(line, node->get_filesize(), total_size);
     fmt::print("{}\n", line);
 }
 
-void print_other(const std::string &filename, const std::string &prefix)
+void print_other(const std::string &filename)
 {
-    fmt::print(fg(cyan), "{}{} ?\n", prefix, filename);
+    fmt::print(fg(cyan), "{} ?\n", filename);
 }
 
-void print_dirs_files_or_other(const std::unique_ptr<filenode::FileNode> &node, const std::string &prefix, uintmax_t total_size)
+void print_dirs_files_or_other(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size)
 {
     if (node->is_file()) {
-        print_file(node, prefix, total_size);
+        print_file(node, total_size);
     } else if (node->is_directory()) {
-        print_directory(node, prefix, total_size);
+        print_directory(node, total_size);
     } else {
-        print_other(node->filename, prefix);
+        print_other(node->filename);
     }
 }
 
-void print_dirs_only(const std::unique_ptr<filenode::FileNode> &node, const std::string &prefix, uintmax_t total_size)
+void print_dirs_only(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size)
 {
     if (node->is_directory()) {
-        print_directory(node, prefix, total_size);
+        print_directory(node, total_size);
     }
 }
 
@@ -117,7 +117,7 @@ void print_pretty_output(const std::unique_ptr<filenode::FileNode> &node, uintma
 {
     fmt::print("{}", prefix);
     fmt::print("{}", (is_last ? "└── " : "├── "));
-    print_dirs_files_or_other(node, "", total_size);
+    print_dirs_files_or_other(node, total_size);
     depth++;
 
     std::string next_prefix = prefix + (is_last ? "    " : "│   ");
@@ -138,7 +138,7 @@ void print_pretty_output_dirs_only(const std::unique_ptr<filenode::FileNode> &no
 {
     fmt::print("{}", prefix);
     fmt::print("{}", (is_last ? "└── " : "├── "));
-    print_dirs_only(node, "", total_size);
+    print_dirs_only(node, total_size);
     depth++;
 
     std::string next_prefix = prefix + (is_last ? "    " : "│   ");
