@@ -71,62 +71,62 @@ class TestCommandLine(TestTree):
     def test_default(self) -> None:
         process = run_subprocess([self.test_dir])
         self.assertEqual(process.exit_code, 0)
-        self.assertRegex(process.stdout, r"foo/.*\[ 9 bytes, 33\.33% \]")
+        self.assertRegex(process.stdout, r"foo/.*\[ 9 bytes, 33\.33%, 3 \]")
         self.assertRegex(process.stdout, r"a.txt.*\[ 3 bytes, 11\.11% \]")
 
     def test_human_readable(self) -> None:
         process = run_subprocess([self.test_dir, "-b"])
         self.assertEqual(process.exit_code, 0)
-        self.assertRegex(process.stdout, r"foo/.*\[ 9, 33\.33% \]")
-        self.assertRegex(process.stdout, r"bar/.*\[ 9, 33\.33% \]")
-        self.assertRegex(process.stdout, r"baz/.*\[ 9, 33\.33% \]")
+        self.assertRegex(process.stdout, r"foo/.*\[ 9, 33\.33%, 3 \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 9, 33\.33%, 3 \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 9, 33\.33%, 3 \]")
         self.assertRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
 
     def test_exclude(self) -> None:
         process = run_subprocess([self.test_dir, "-Ifoo"])
         self.assertEqual(process.exit_code, 0)
         self.assertNotRegex(process.stdout, "foo")
-        self.assertRegex(process.stdout, r"bar/.*\[ 9 bytes, 33\.33% \]")
-        self.assertRegex(process.stdout, r"baz/.*\[ 9 bytes, 33\.33% \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 9 bytes, 33\.33%, 3 \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 9 bytes, 33\.33%, 3 \]")
 
     def test_dirs_only(self) -> None:
         process = run_subprocess([self.test_dir, "-d"])
         self.assertEqual(process.exit_code, 0)
-        self.assertRegex(process.stdout, r"foo/.*\[ 9 bytes, 33\.33% \]")
-        self.assertRegex(process.stdout, r"bar/.*\[ 9 bytes, 33\.33% \]")
-        self.assertRegex(process.stdout, r"baz/.*\[ 9 bytes, 33\.33% \]")
+        self.assertRegex(process.stdout, r"foo/.*\[ 9 bytes, 33\.33%, 3 \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 9 bytes, 33\.33%, 3 \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 9 bytes, 33\.33%, 3 \]")
         self.assertNotRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
 
     def test_dirs_only_exclude(self) -> None:
         process = run_subprocess([self.test_dir, "-d", "-Ifoo"])
         self.assertEqual(process.exit_code, 0)
         self.assertNotRegex(process.stdout, "foo")
-        self.assertRegex(process.stdout, r"bar/.*\[ 9 bytes, 33\.33% \]")
-        self.assertRegex(process.stdout, r"baz/.*\[ 9 bytes, 33\.33% \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 9 bytes, 33\.33%, 3 \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 9 bytes, 33\.33%, 3 \]")
         self.assertNotRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
 
     def test_dirs_only_human_readable(self) -> None:
         process = run_subprocess([self.test_dir, "-db"])
         self.assertEqual(process.exit_code, 0)
-        self.assertRegex(process.stdout, r"foo/.*\[ 9, 33\.33% \]")
-        self.assertRegex(process.stdout, r"bar/.*\[ 9, 33\.33% \]")
-        self.assertRegex(process.stdout, r"baz/.*\[ 9, 33\.33% \]")
+        self.assertRegex(process.stdout, r"foo/.*\[ 9, 33\.33%, 3 \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 9, 33\.33%, 3 \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 9, 33\.33%, 3 \]")
         self.assertNotRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
 
     def test_level(self) -> None:
         process = run_subprocess([self.test_dir, "-L1"])
         self.assertEqual(process.exit_code, 0)
-        self.assertRegex(process.stdout, r"foo/.*\[ 9 bytes, 33\.33% \]")
-        self.assertRegex(process.stdout, r"bar/.*\[ 9 bytes, 33\.33% \]")
-        self.assertRegex(process.stdout, r"baz/.*\[ 9 bytes, 33\.33% \]")
+        self.assertRegex(process.stdout, r"foo/.*\[ 9 bytes, 33\.33%, 3 \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 9 bytes, 33\.33%, 3 \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 9 bytes, 33\.33%, 3 \]")
         self.assertNotRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
 
     def test_level_human_readable(self) -> None:
         process = run_subprocess([self.test_dir, "-L1", "-b"])
         self.assertEqual(process.exit_code, 0)
-        self.assertRegex(process.stdout, r"foo/.*\[ 9, 33\.33% \]")
-        self.assertRegex(process.stdout, r"bar/.*\[ 9, 33\.33% \]")
-        self.assertRegex(process.stdout, r"baz/.*\[ 9, 33\.33% \]")
+        self.assertRegex(process.stdout, r"foo/.*\[ 9, 33\.33%, 3 \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 9, 33\.33%, 3 \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 9, 33\.33%, 3 \]")
         self.assertNotRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
 
     def test_level_human_readable_exclude(self) -> None:
@@ -134,8 +134,8 @@ class TestCommandLine(TestTree):
         self.assertEqual(process.exit_code, 0)
         self.assertNotRegex(process.stdout, "foo")
         self.assertNotRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
-        self.assertRegex(process.stdout, r"bar/.*\[ 9, 33\.33% \]")
-        self.assertRegex(process.stdout, r"baz/.*\[ 9, 33\.33% \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 9, 33\.33%, 3 \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 9, 33\.33%, 3 \]")
 
     def test_exclude_multiple(self) -> None:
         process = run_subprocess([self.test_dir, "-Ifoo", "-Ibar", "-Ibaz"])
