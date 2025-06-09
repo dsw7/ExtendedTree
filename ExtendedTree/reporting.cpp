@@ -39,21 +39,6 @@ void cache_whitespace(int depth)
     WHITESPACE.emplace(depth, std::string(depth * TAB_WIDTH, ' '));
 }
 
-void print_file(const std::string &filename, int depth)
-{
-    fmt::print("{}{} ", WHITESPACE[depth], filename);
-}
-
-void print_directory(const std::string &filename, int depth)
-{
-    fmt::print(fg(blue), "{}{}/ ", WHITESPACE[depth], filename);
-}
-
-void print_other(const std::string &filename, int depth)
-{
-    fmt::print(fg(cyan), "{}{} ?\n", WHITESPACE[depth], filename);
-}
-
 void print_relative_usage(uintmax_t size, uintmax_t total_size)
 {
     float relative_size = utils::compute_relative_usage(size, total_size);
@@ -65,16 +50,31 @@ void print_relative_usage(uintmax_t size, uintmax_t total_size)
     }
 }
 
+void print_file(const std::unique_ptr<filenode::FileNode> &node, int depth, uintmax_t total_size)
+{
+    fmt::print("{}{} ", WHITESPACE[depth], node->filename);
+    print_relative_usage(node->get_filesize(), total_size);
+}
+
+void print_directory(const std::unique_ptr<filenode::FileNode> &node, int depth, uintmax_t total_size)
+{
+    fmt::print(fg(blue), "{}{}/ ", WHITESPACE[depth], node->filename);
+    print_relative_usage(node->get_filesize(), total_size);
+}
+
+void print_other(const std::string &filename, int depth)
+{
+    fmt::print(fg(cyan), "{}{} ?\n", WHITESPACE[depth], filename);
+}
+
 void print_dirs_files_or_other(const std::unique_ptr<filenode::FileNode> &node, int depth, uintmax_t total_size)
 {
     cache_whitespace(depth);
 
     if (node->is_file()) {
-        print_file(node->filename, depth);
-        print_relative_usage(node->get_filesize(), total_size);
+        print_file(node, depth, total_size);
     } else if (node->is_directory()) {
-        print_directory(node->filename, depth);
-        print_relative_usage(node->get_filesize(), total_size);
+        print_directory(node, depth, total_size);
     } else {
         print_other(node->filename, depth);
     }
@@ -85,8 +85,7 @@ void print_dirs_only(const std::unique_ptr<filenode::FileNode> &node, int depth,
     cache_whitespace(depth);
 
     if (node->is_directory()) {
-        print_directory(node->filename, depth);
-        print_relative_usage(node->get_filesize(), total_size);
+        print_directory(node, depth, total_size);
     }
 }
 
