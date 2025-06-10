@@ -1,6 +1,7 @@
 #include "utils.hpp"
 
 #include <cmath>
+#include <iomanip>
 #include <stdexcept>
 #include <sys/stat.h>
 
@@ -37,30 +38,37 @@ uintmax_t get_disk_usage(const std::string &path)
     return static_cast<uintmax_t>(buf_filestats.st_blocks) * 512; // Convert to bytes
 }
 
-std::string bytes_to_human(uintmax_t bytes)
+std::string bytes_to_human(uint64_t bytes)
 {
-    static uintmax_t kb = 1000;
-    static uintmax_t mb = std::pow(1000, 2);
-    static uintmax_t gb = std::pow(1000, 3);
-    static uintmax_t tb = std::pow(1000, 4);
+    constexpr uint64_t KIB = 1024;
+    constexpr uint64_t MIB = KIB * 1024;
+    constexpr uint64_t GIB = MIB * 1024;
+    constexpr uint64_t TIB = GIB * 1024;
 
-    if (bytes < kb) {
-        return std::to_string(bytes);
-    }
+    double value;
+    std::string unit;
 
-    std::string result;
-
-    if (bytes >= kb && bytes < mb) {
-        result = std::to_string((bytes + kb - 1) / kb) + 'K';
-    } else if (bytes >= mb && bytes < gb) {
-        result = std::to_string((bytes + mb - 1) / mb) + 'M';
-    } else if (bytes >= gb && bytes < tb) {
-        result = std::to_string((bytes + gb - 1) / gb) + 'G';
+    if (bytes >= TIB) {
+        value = static_cast<double>(bytes) / TIB;
+        unit = "TiB";
+    } else if (bytes >= GIB) {
+        value = static_cast<double>(bytes) / GIB;
+        unit = "GiB";
+    } else if (bytes >= MIB) {
+        value = static_cast<double>(bytes) / MIB;
+        unit = "MiB";
+    } else if (bytes >= KIB) {
+        value = static_cast<double>(bytes) / KIB;
+        unit = "KiB";
     } else {
-        result = std::to_string((bytes + tb - 1) / tb) + 'T';
+        value = static_cast<double>(bytes);
+        unit = "B";
     }
 
-    return result;
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(2) << value << ' ' << unit;
+
+    return oss.str();
 }
 
 } // namespace utils
