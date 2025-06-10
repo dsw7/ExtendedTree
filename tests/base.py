@@ -41,12 +41,9 @@ class TestTree(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.test_dir: Path = build_test_dir()
+        cls.block_size = statvfs(cls.test_dir).f_frsize
 
     @classmethod
     def tearDownClass(cls) -> None:
         if cls.test_dir.exists():
             rmtree(cls.test_dir)
-
-    def get_block_size(self) -> int:
-        statvfs_info = statvfs(self.test_dir)
-        return statvfs_info.f_frsize
