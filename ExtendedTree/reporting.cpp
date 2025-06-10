@@ -46,10 +46,10 @@ void append_usage(std::string &line, uintmax_t size, uintmax_t total_size)
 {
     float relative_size = utils::compute_relative_usage(size, total_size);
 
-    if (params::PRINT_HUMAN_READABLE) {
-        line += fmt::format(fg(green), "[ {}, {:.{}f}% ]", utils::bytes_to_human(size), relative_size, 2);
+    if (params::PRINT_BYTES) {
+        line += fmt::format(fg(green), "[ {} B, {:.{}f}% ]", size, relative_size, 2);
     } else {
-        line += fmt::format(fg(green), "[ {} bytes, {:.{}f}% ]", size, relative_size, 2);
+        line += fmt::format(fg(green), "[ {}, {:.{}f}% ]", utils::bytes_to_human(size), relative_size, 2);
     }
 }
 
@@ -57,10 +57,10 @@ void append_usage(std::string &line, uintmax_t size, uintmax_t total_size, uintm
 {
     float relative_size = utils::compute_relative_usage(size, total_size);
 
-    if (params::PRINT_HUMAN_READABLE) {
-        line += fmt::format(fg(green), "[ {}, {:.{}f}%, {} ]", utils::bytes_to_human(size), relative_size, 2, num_children);
+    if (params::PRINT_BYTES) {
+        line += fmt::format(fg(green), "[ {} B, {:.{}f}%, {} ]", size, relative_size, 2, num_children);
     } else {
-        line += fmt::format(fg(green), "[ {} bytes, {:.{}f}%, {} ]", size, relative_size, 2, num_children);
+        line += fmt::format(fg(green), "[ {}, {:.{}f}%, {} ]", utils::bytes_to_human(size), relative_size, 2, num_children);
     }
 }
 

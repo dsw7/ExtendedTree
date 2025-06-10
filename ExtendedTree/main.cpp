@@ -17,7 +17,7 @@ void print_help_messages()
 {
     fmt::print("Usage:\n  etree [OPTION]... DIRECTORY\n\n");
     fmt::print("Options:\n");
-    fmt::print("  -b         {}\n", "Print sizes in human readable units");
+    fmt::print("  -b         {}\n", "Print sizes in bytes");
     fmt::print("  -d         {}\n", "Print directories only");
     fmt::print("  -j <level> {}\n", "Print output as JSON with indentation <level>");
     fmt::print("  -I         {}\n", "Exclude one or more files or directories");
@@ -59,7 +59,7 @@ void parse_cli_options(int argc, char **argv)
                 print_help_messages();
                 exit(EXIT_SUCCESS);
             case 'b':
-                params::PRINT_HUMAN_READABLE = true;
+                params::PRINT_BYTES = true;
                 break;
             case 'd':
                 params::PRINT_DIRS_ONLY = true;
