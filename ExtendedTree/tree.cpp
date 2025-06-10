@@ -23,6 +23,7 @@ struct Stats {
 void discover_layout(const std::string &dir, filenode::FileNode &parent, Stats &stats)
 {
     uintmax_t dir_size = 0;
+    uintmax_t dir_disk_usage = utils::get_disk_usage(dir);
     uintmax_t num_children = 0;
 
     for (auto const &entry: fs::directory_iterator { dir }) {
@@ -32,25 +33,25 @@ void discover_layout(const std::string &dir, filenode::FileNode &parent, Stats &
         if (entry.is_regular_file()) {
             child->set_is_file();
             uintmax_t size = fs::file_size(entry);
+            uintmax_t disk_usage = utils::get_disk_usage(entry.path().string());
+
             child->set_filesize(size);
+            child->set_disk_usage(disk_usage);
+            dir_size += size;
+            dir_disk_usage += disk_usage;
             stats.total_size += size;
             stats.num_files++;
+            num_children++;
         } else if (entry.is_directory()) {
             child->set_is_directory();
+            discover_layout(entry.path().string(), *child, stats);
+            dir_size += child->get_filesize();
+            dir_disk_usage += child->get_disk_usage(); // Accumulate children's disk usage
+            num_children += child->get_num_children();
             stats.num_directories++;
         } else {
             child->set_is_other();
             stats.num_other++;
-        }
-
-        if (child->is_directory()) {
-            discover_layout(entry.path().string(), *child, stats);
-            dir_size += child->get_filesize();
-            num_children += child->get_num_children();
-        } else if (child->is_file()) {
-            dir_size += child->get_filesize();
-            num_children++;
-        } else if (child->is_other()) {
             num_children++;
         }
 
@@ -59,6 +60,7 @@ void discover_layout(const std::string &dir, filenode::FileNode &parent, Stats &
 
     if (parent.is_directory()) {
         parent.set_filesize(dir_size);
+        parent.set_disk_usage(dir_disk_usage); // Set the cumulative disk usage
         parent.set_num_children(num_children);
     }
 }
