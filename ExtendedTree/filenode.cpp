@@ -7,6 +7,16 @@ FileNode::FileNode(const std::string &filename)
     this->filename = filename;
 }
 
+void FileNode::set_disk_usage(uintmax_t disk_usage)
+{
+    this->disk_usage_ = disk_usage;
+}
+
+uintmax_t FileNode::get_disk_usage()
+{
+    return this->disk_usage_.value_or(0);
+}
+
 void FileNode::set_filesize(uintmax_t filesize)
 {
     this->filesize_ = filesize;

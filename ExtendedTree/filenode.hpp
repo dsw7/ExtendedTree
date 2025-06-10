@@ -16,8 +16,9 @@ enum FileType {
 class FileNode {
 private:
     FileType filetype_ = REGULAR_FILE;
-    std::optional<uintmax_t> num_children_ = std::nullopt;
+    std::optional<uintmax_t> disk_usage_ = std::nullopt;
     std::optional<uintmax_t> filesize_ = std::nullopt;
+    std::optional<uintmax_t> num_children_ = std::nullopt;
 
 public:
     std::string filename;
@@ -25,6 +26,8 @@ public:
 
     FileNode(const std::string &filename);
 
+    void set_disk_usage(uintmax_t disk_usage);
+    uintmax_t get_disk_usage();
     void set_filesize(uintmax_t filesize);
     uintmax_t get_filesize();
     void set_num_children(uintmax_t num_children);
