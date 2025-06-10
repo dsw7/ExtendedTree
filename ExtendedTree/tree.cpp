@@ -25,13 +25,11 @@ void discover_layout(const std::string &dir, filenode::FileNode &parent, Stats &
     uintmax_t num_children = 0;
 
     for (auto const &entry: fs::directory_iterator { dir }) {
-        const std::string filename = entry.path().filename();
-        std::unique_ptr<filenode::FileNode> child = std::make_unique<filenode::FileNode>(filename);
+        std::unique_ptr<filenode::FileNode> child = std::make_unique<filenode::FileNode>(entry);
 
         if (entry.is_regular_file()) {
             child->set_is_file();
             uintmax_t disk_usage = utils::get_disk_usage(entry.path().string());
-
             child->set_disk_usage(disk_usage);
             dir_disk_usage += disk_usage;
             stats.num_files++;
@@ -39,7 +37,7 @@ void discover_layout(const std::string &dir, filenode::FileNode &parent, Stats &
         } else if (entry.is_directory()) {
             child->set_is_directory();
             discover_layout(entry.path().string(), *child, stats);
-            dir_disk_usage += child->get_disk_usage(); // Accumulate children's disk usage
+            dir_disk_usage += child->get_disk_usage();
             num_children += child->get_num_children();
             stats.num_directories++;
         } else {
@@ -52,7 +50,7 @@ void discover_layout(const std::string &dir, filenode::FileNode &parent, Stats &
     }
 
     if (parent.is_directory()) {
-        parent.set_disk_usage(dir_disk_usage); // Set the cumulative disk usage
+        parent.set_disk_usage(dir_disk_usage);
         parent.set_num_children(num_children);
     }
 }

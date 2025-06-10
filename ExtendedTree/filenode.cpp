@@ -2,9 +2,9 @@
 
 namespace filenode {
 
-FileNode::FileNode(const std::string &filename)
+FileNode::FileNode(const std::filesystem::path &path)
 {
-    this->filename = filename;
+    this->filename = path.filename();
 }
 
 void FileNode::set_disk_usage(uintmax_t disk_usage)

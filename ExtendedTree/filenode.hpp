@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <memory>
 #include <optional>
 #include <string>
@@ -23,7 +24,7 @@ public:
     std::string filename;
     std::vector<std::unique_ptr<FileNode>> children;
 
-    FileNode(const std::string &filename);
+    FileNode(const std::filesystem::path &path);
 
     void set_disk_usage(uintmax_t disk_usage);
     uintmax_t get_disk_usage();
