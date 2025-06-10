@@ -17,16 +17,6 @@ uintmax_t FileNode::get_disk_usage()
     return this->disk_usage_.value_or(0);
 }
 
-void FileNode::set_filesize(uintmax_t filesize)
-{
-    this->filesize_ = filesize;
-}
-
-uintmax_t FileNode::get_filesize()
-{
-    return this->filesize_.value_or(0);
-}
-
 void FileNode::set_num_children(uintmax_t num_children)
 {
     this->num_children_ = num_children;

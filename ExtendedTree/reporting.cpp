@@ -71,13 +71,13 @@ nlohmann::json build_json_from_tree(const std::unique_ptr<filenode::FileNode> &n
 
     if (node->is_file()) {
         j["filename"] = node->filename;
-        j["filesize"] = node->get_filesize();
-        j["usage"] = utils::compute_relative_usage(node->get_filesize(), total_size);
+        j["filesize"] = node->get_disk_usage();
+        j["usage"] = utils::compute_relative_usage(node->get_disk_usage(), total_size);
     } else if (node->is_directory()) {
         j["dirname"] = node->filename;
         j["num_children"] = node->get_num_children();
-        j["filesize"] = node->get_filesize();
-        j["usage"] = utils::compute_relative_usage(node->get_filesize(), total_size);
+        j["filesize"] = node->get_disk_usage();
+        j["usage"] = utils::compute_relative_usage(node->get_disk_usage(), total_size);
     } else {
         j["filename"] = node->filename;
         j["filesize"] = nullptr;
@@ -123,10 +123,10 @@ void print_pretty_output(const std::unique_ptr<filenode::FileNode> &node, uintma
 
     if (node->is_file()) {
         append_file(line, node->filename);
-        append_usage(line, node->get_filesize(), total_size);
+        append_usage(line, node->get_disk_usage(), total_size);
     } else if (node->is_directory()) {
         append_directory(line, node->filename);
-        append_usage(line, node->get_filesize(), total_size, node->get_num_children());
+        append_usage(line, node->get_disk_usage(), total_size, node->get_num_children());
     } else {
         append_other(line, node->filename);
     }
@@ -165,7 +165,7 @@ void print_pretty_output_dirs_only(const std::unique_ptr<filenode::FileNode> &no
         }
 
         append_directory(line, node->filename);
-        append_usage(line, node->get_filesize(), total_size, node->get_num_children());
+        append_usage(line, node->get_disk_usage(), total_size, node->get_num_children());
         fmt::print("{}\n", line);
     } else {
         next_prefix = "";
@@ -183,9 +183,9 @@ void print_pretty_output_dirs_only(const std::unique_ptr<filenode::FileNode> &no
     }
 }
 
-void print_json(const std::unique_ptr<filenode::FileNode> &node, uintmax_t total_size)
+void print_json(const std::unique_ptr<filenode::FileNode> &root)
 {
-    nlohmann::json json = build_json_from_tree(node, total_size);
+    nlohmann::json json = build_json_from_tree(root, root->get_disk_usage());
     fmt::print("{}\n", json.dump(params::INDENT_LEVEL));
 }
 
