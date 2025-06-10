@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <memory>
 #include <optional>
 #include <string>
@@ -16,17 +17,17 @@ enum FileType {
 class FileNode {
 private:
     FileType filetype_ = REGULAR_FILE;
+    std::optional<uintmax_t> disk_usage_ = std::nullopt;
     std::optional<uintmax_t> num_children_ = std::nullopt;
-    std::optional<uintmax_t> filesize_ = std::nullopt;
 
 public:
     std::string filename;
     std::vector<std::unique_ptr<FileNode>> children;
 
-    FileNode(const std::string &filename);
+    FileNode(const std::filesystem::path &path);
 
-    void set_filesize(uintmax_t filesize);
-    uintmax_t get_filesize();
+    void set_disk_usage(uintmax_t disk_usage);
+    uintmax_t get_disk_usage();
     void set_num_children(uintmax_t num_children);
     uintmax_t get_num_children();
     void set_is_file();

@@ -2,19 +2,19 @@
 
 namespace filenode {
 
-FileNode::FileNode(const std::string &filename)
+FileNode::FileNode(const std::filesystem::path &path)
 {
-    this->filename = filename;
+    this->filename = path.filename();
 }
 
-void FileNode::set_filesize(uintmax_t filesize)
+void FileNode::set_disk_usage(uintmax_t disk_usage)
 {
-    this->filesize_ = filesize;
+    this->disk_usage_ = disk_usage;
 }
 
-uintmax_t FileNode::get_filesize()
+uintmax_t FileNode::get_disk_usage()
 {
-    return this->filesize_.value_or(0);
+    return this->disk_usage_.value_or(0);
 }
 
 void FileNode::set_num_children(uintmax_t num_children)

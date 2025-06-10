@@ -42,71 +42,71 @@ class TestCommandLine(TestTree):
     def test_default(self) -> None:
         process = run_subprocess([self.test_dir])
         self.assertEqual(process.exit_code, 0)
-        self.assertRegex(process.stdout, r"foo/.*\[ 9 bytes, 33\.33%, 3 \]")
-        self.assertRegex(process.stdout, r"a.txt.*\[ 3 bytes, 11\.11% \]")
+        self.assertRegex(process.stdout, r"foo/.*\[ 16.00 KiB, 30\.77%, 3 \]")
+        self.assertRegex(process.stdout, r"a.txt.*\[ 4.00 KiB, 7\.69% \]")
 
-    def test_human_readable(self) -> None:
+    def test_print_bytes(self) -> None:
         process = run_subprocess([self.test_dir, "-b"])
         self.assertEqual(process.exit_code, 0)
-        self.assertRegex(process.stdout, r"foo/.*\[ 9, 33\.33%, 3 \]")
-        self.assertRegex(process.stdout, r"bar/.*\[ 9, 33\.33%, 3 \]")
-        self.assertRegex(process.stdout, r"baz/.*\[ 9, 33\.33%, 3 \]")
+        self.assertRegex(process.stdout, r"foo/.*\[ 16384 B, 30\.77%, 3 \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 16384 B, 30\.77%, 3 \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 16384 B, 30\.77%, 3 \]")
         self.assertRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
 
     def test_exclude(self) -> None:
         process = run_subprocess([self.test_dir, "-Ifoo"])
         self.assertEqual(process.exit_code, 0)
         self.assertNotRegex(process.stdout, "foo")
-        self.assertRegex(process.stdout, r"bar/.*\[ 9 bytes, 33\.33%, 3 \]")
-        self.assertRegex(process.stdout, r"baz/.*\[ 9 bytes, 33\.33%, 3 \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 16.00 KiB, 30\.77%, 3 \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 16.00 KiB, 30\.77%, 3 \]")
 
     def test_dirs_only(self) -> None:
         process = run_subprocess([self.test_dir, "-d"])
         self.assertEqual(process.exit_code, 0)
-        self.assertRegex(process.stdout, r"foo/.*\[ 9 bytes, 33\.33%, 3 \]")
-        self.assertRegex(process.stdout, r"bar/.*\[ 9 bytes, 33\.33%, 3 \]")
-        self.assertRegex(process.stdout, r"baz/.*\[ 9 bytes, 33\.33%, 3 \]")
+        self.assertRegex(process.stdout, r"foo/.*\[ 16.00 KiB, 30\.77%, 3 \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 16.00 KiB, 30\.77%, 3 \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 16.00 KiB, 30\.77%, 3 \]")
         self.assertNotRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
 
     def test_dirs_only_exclude(self) -> None:
         process = run_subprocess([self.test_dir, "-d", "-Ifoo"])
         self.assertEqual(process.exit_code, 0)
         self.assertNotRegex(process.stdout, "foo")
-        self.assertRegex(process.stdout, r"bar/.*\[ 9 bytes, 33\.33%, 3 \]")
-        self.assertRegex(process.stdout, r"baz/.*\[ 9 bytes, 33\.33%, 3 \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 16.00 KiB, 30\.77%, 3 \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 16.00 KiB, 30\.77%, 3 \]")
         self.assertNotRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
 
-    def test_dirs_only_human_readable(self) -> None:
+    def test_dirs_only_print_bytes(self) -> None:
         process = run_subprocess([self.test_dir, "-db"])
         self.assertEqual(process.exit_code, 0)
-        self.assertRegex(process.stdout, r"foo/.*\[ 9, 33\.33%, 3 \]")
-        self.assertRegex(process.stdout, r"bar/.*\[ 9, 33\.33%, 3 \]")
-        self.assertRegex(process.stdout, r"baz/.*\[ 9, 33\.33%, 3 \]")
+        self.assertRegex(process.stdout, r"foo/.*\[ 16384 B, 30\.77%, 3 \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 16384 B, 30\.77%, 3 \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 16384 B, 30\.77%, 3 \]")
         self.assertNotRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
 
     def test_level(self) -> None:
         process = run_subprocess([self.test_dir, "-L1"])
         self.assertEqual(process.exit_code, 0)
-        self.assertRegex(process.stdout, r"foo/.*\[ 9 bytes, 33\.33%, 3 \]")
-        self.assertRegex(process.stdout, r"bar/.*\[ 9 bytes, 33\.33%, 3 \]")
-        self.assertRegex(process.stdout, r"baz/.*\[ 9 bytes, 33\.33%, 3 \]")
+        self.assertRegex(process.stdout, r"foo/.*\[ 16.00 KiB, 30\.77%, 3 \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 16.00 KiB, 30\.77%, 3 \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 16.00 KiB, 30\.77%, 3 \]")
         self.assertNotRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
 
-    def test_level_human_readable(self) -> None:
+    def test_level_print_bytes(self) -> None:
         process = run_subprocess([self.test_dir, "-L1", "-b"])
         self.assertEqual(process.exit_code, 0)
-        self.assertRegex(process.stdout, r"foo/.*\[ 9, 33\.33%, 3 \]")
-        self.assertRegex(process.stdout, r"bar/.*\[ 9, 33\.33%, 3 \]")
-        self.assertRegex(process.stdout, r"baz/.*\[ 9, 33\.33%, 3 \]")
+        self.assertRegex(process.stdout, r"foo/.*\[ 16384 B, 30\.77%, 3 \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 16384 B, 30\.77%, 3 \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 16384 B, 30\.77%, 3 \]")
         self.assertNotRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
 
-    def test_level_human_readable_exclude(self) -> None:
+    def test_level_print_bytes_exclude(self) -> None:
         process = run_subprocess([self.test_dir, "-L1", "-b", "-Ifoo"])
         self.assertEqual(process.exit_code, 0)
         self.assertNotRegex(process.stdout, "foo")
         self.assertNotRegex(process.stdout, r"(a\.txt|b\.txt|c\.txt)")
-        self.assertRegex(process.stdout, r"bar/.*\[ 9, 33\.33%, 3 \]")
-        self.assertRegex(process.stdout, r"baz/.*\[ 9, 33\.33%, 3 \]")
+        self.assertRegex(process.stdout, r"bar/.*\[ 16384 B, 30\.77%, 3 \]")
+        self.assertRegex(process.stdout, r"baz/.*\[ 16384 B, 30\.77%, 3 \]")
 
     def test_exclude_multiple(self) -> None:
         process = run_subprocess([self.test_dir, "-Ifoo", "-Ibar", "-Ibaz"])
@@ -121,69 +121,71 @@ class TestValidReporting(TestTree):
         self.assertEqual(process.exit_code, 0)
 
         json = loads(process.stdout)
-        self.assertEqual(json["dirname"], "/tmp/etree_test")
+        self.assertEqual(json["dirname"], "etree_test")
         self.assertEqual(json["num_children"], 9)
-        self.assertEqual(json["filesize"], 27)
-        self.assertEqual(json["usage"], 100)
+        self.assertEqual(
+            json["disk_usage"], 13 * self.block_size
+        )  # 13 children (including dirs)
+        self.assertEqual(json["relative_usage"], 100)
 
         self.assertEqual(len(json["children"]), 3)
 
         child = json["children"][0]
         self.assertIn(child["dirname"], {"foo", "bar", "baz"})
         self.assertEqual(child["num_children"], 3)
-        self.assertEqual(child["filesize"], 9)
-        self.assertAlmostEqual(child["usage"], 33.3333, places=4)
+        self.assertEqual(child["disk_usage"], 4 * self.block_size)
+        self.assertAlmostEqual(child["relative_usage"], 30.7692, places=4)
 
         self.assertEqual(len(child["children"]), 3)
 
         subchild = child["children"][0]
         self.assertIn(subchild["filename"], {"a.txt", "b.txt", "c.txt"})
         self.assertNotIn("num_children", subchild)
-        self.assertEqual(subchild["filesize"], 3)
-        self.assertAlmostEqual(subchild["usage"], 11.1111, places=4)
+        self.assertEqual(subchild["disk_usage"], self.block_size)
+        self.assertAlmostEqual(subchild["relative_usage"], 7.6923, places=4)
 
     def test_json_with_excludes(self) -> None:
         process = run_subprocess([self.test_dir, "-j -1", "-Ifoo", "-Ibar"])
         self.assertEqual(process.exit_code, 0)
 
         json = loads(process.stdout)
-        self.assertEqual(json["dirname"], "/tmp/etree_test")
+        self.assertEqual(json["dirname"], "etree_test")
         self.assertEqual(json["num_children"], 9)
-        self.assertEqual(json["filesize"], 27)
-        self.assertEqual(json["usage"], 100)
+        self.assertEqual(json["disk_usage"], 13 * self.block_size)
+        self.assertEqual(json["relative_usage"], 100)
 
         self.assertEqual(len(json["children"]), 1)
 
         child = json["children"][0]
         self.assertEqual(child["dirname"], "baz")
         self.assertEqual(child["num_children"], 3)
-        self.assertEqual(child["filesize"], 9)
-        self.assertAlmostEqual(child["usage"], 33.3333, places=4)
+        self.assertEqual(child["disk_usage"], 4 * self.block_size)
+        self.assertAlmostEqual(child["relative_usage"], 30.7692, places=4)
 
         self.assertEqual(len(child["children"]), 3)
 
         subchild = child["children"][0]
         self.assertIn(subchild["filename"], {"a.txt", "b.txt", "c.txt"})
         self.assertNotIn("num_children", subchild)
-        self.assertEqual(subchild["filesize"], 3)
-        self.assertAlmostEqual(subchild["usage"], 11.1111, places=4)
+        self.assertEqual(subchild["disk_usage"], self.block_size)
+        self.assertAlmostEqual(subchild["relative_usage"], 7.6923, places=4)
 
     def test_json_with_level(self) -> None:
         process = run_subprocess([self.test_dir, "-j -1", "-L1"])
         self.assertEqual(process.exit_code, 0)
 
         json = loads(process.stdout)
-        self.assertEqual(json["dirname"], "/tmp/etree_test")
+        self.assertEqual(json["dirname"], "etree_test")
         self.assertEqual(json["num_children"], 9)
-        self.assertEqual(json["filesize"], 27)
-        self.assertEqual(json["usage"], 100)
+        self.assertEqual(json["disk_usage"], 13 * self.block_size)
+        self.assertEqual(json["relative_usage"], 100)
 
         self.assertEqual(len(json["children"]), 3)
 
         child = json["children"][0]
         self.assertIn(child["dirname"], {"foo", "bar", "baz"})
         self.assertEqual(child["num_children"], 3)
-        self.assertEqual(child["filesize"], 9)
-        self.assertAlmostEqual(child["usage"], 33.3333, places=4)
+        self.assertEqual(child["disk_usage"], 4 * self.block_size)
+        self.assertAlmostEqual(child["relative_usage"], 30.7692, places=4)
 
         self.assertEqual(len(child["children"]), 0)

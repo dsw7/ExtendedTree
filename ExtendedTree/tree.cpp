@@ -17,40 +17,32 @@ struct Stats {
     int num_directories = 0;
     int num_files = 0;
     int num_other = 0;
-    uintmax_t total_size = 0;
 };
 
 void discover_layout(const std::string &dir, filenode::FileNode &parent, Stats &stats)
 {
-    uintmax_t dir_size = 0;
+    uintmax_t dir_disk_usage = utils::get_disk_usage(dir);
     uintmax_t num_children = 0;
 
     for (auto const &entry: fs::directory_iterator { dir }) {
-        std::string filename = entry.path().filename();
-        std::unique_ptr<filenode::FileNode> child = std::make_unique<filenode::FileNode>(filename);
+        std::unique_ptr<filenode::FileNode> child = std::make_unique<filenode::FileNode>(entry);
 
         if (entry.is_regular_file()) {
             child->set_is_file();
-            uintmax_t size = fs::file_size(entry);
-            child->set_filesize(size);
-            stats.total_size += size;
+            uintmax_t disk_usage = utils::get_disk_usage(entry.path().string());
+            child->set_disk_usage(disk_usage);
+            dir_disk_usage += disk_usage;
             stats.num_files++;
+            num_children++;
         } else if (entry.is_directory()) {
             child->set_is_directory();
+            discover_layout(entry.path().string(), *child, stats);
+            dir_disk_usage += child->get_disk_usage();
+            num_children += child->get_num_children();
             stats.num_directories++;
         } else {
             child->set_is_other();
             stats.num_other++;
-        }
-
-        if (child->is_directory()) {
-            discover_layout(entry.path().string(), *child, stats);
-            dir_size += child->get_filesize();
-            num_children += child->get_num_children();
-        } else if (child->is_file()) {
-            dir_size += child->get_filesize();
-            num_children++;
-        } else if (child->is_other()) {
             num_children++;
         }
 
@@ -58,25 +50,27 @@ void discover_layout(const std::string &dir, filenode::FileNode &parent, Stats &
     }
 
     if (parent.is_directory()) {
-        parent.set_filesize(dir_size);
+        parent.set_disk_usage(dir_disk_usage);
         parent.set_num_children(num_children);
     }
 }
 
 void print_pretty_output(const std::unique_ptr<filenode::FileNode> &root, const Stats &stats)
 {
+    uintmax_t total_disk_usage = root->get_disk_usage();
+
     if (params::PRINT_DIRS_ONLY) {
-        reporting::print_pretty_output_dirs_only(root, stats.total_size);
+        reporting::print_pretty_output_dirs_only(root, total_disk_usage);
     } else {
-        reporting::print_pretty_output(root, stats.total_size);
+        reporting::print_pretty_output(root, total_disk_usage);
     }
 
     fmt::print("\n");
 
-    if (params::PRINT_HUMAN_READABLE) {
-        fmt::print("Total size: {}\n", utils::bytes_to_human(stats.total_size));
+    if (params::PRINT_BYTES) {
+        fmt::print("Total size: {}\n", total_disk_usage);
     } else {
-        fmt::print("Total size: {}\n", stats.total_size);
+        fmt::print("Total size: {}\n", utils::bytes_to_human(total_disk_usage));
     }
 
     fmt::print("Number of directories: {}\n", stats.num_directories);
@@ -100,7 +94,7 @@ void run_tree()
     discover_layout(params::TARGET, *root, stats);
 
     if (params::PRINT_JSON) {
-        reporting::print_json(root, stats.total_size);
+        reporting::print_json(root);
     } else {
         print_pretty_output(root, stats);
     }
