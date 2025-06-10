@@ -26,7 +26,7 @@ void discover_layout(const std::string &dir, filenode::FileNode &parent, Stats &
     uintmax_t num_children = 0;
 
     for (auto const &entry: fs::directory_iterator { dir }) {
-        std::string filename = entry.path().filename();
+        const std::string filename = entry.path().filename();
         std::unique_ptr<filenode::FileNode> child = std::make_unique<filenode::FileNode>(filename);
 
         if (entry.is_regular_file()) {
