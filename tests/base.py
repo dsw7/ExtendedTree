@@ -1,5 +1,5 @@
 from functools import cache
-from os import environ
+from os import environ, statvfs
 from pathlib import Path
 from shutil import rmtree
 from tempfile import gettempdir
@@ -46,3 +46,7 @@ class TestTree(TestCase):
     def tearDownClass(cls) -> None:
         if cls.test_dir.exists():
             rmtree(cls.test_dir)
+
+    def get_block_size(self) -> int:
+        statvfs_info = statvfs(self.test_dir)
+        return statvfs_info.f_frsize
