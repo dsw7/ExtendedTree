@@ -53,14 +53,14 @@ void append_usage(std::string &line, uintmax_t size, uintmax_t total_size)
     }
 }
 
-void append_usage(std::string &line, uintmax_t size, uintmax_t total_size, uintmax_t filecount)
+void append_usage(std::string &line, uintmax_t size, uintmax_t total_size, uintmax_t num_children)
 {
     float relative_size = utils::compute_relative_usage(size, total_size);
 
     if (params::PRINT_HUMAN_READABLE) {
-        line += fmt::format(fg(green), "[ {}, {:.{}f}%, {} ]", utils::bytes_to_human(size), relative_size, 2, filecount);
+        line += fmt::format(fg(green), "[ {}, {:.{}f}%, {} ]", utils::bytes_to_human(size), relative_size, 2, num_children);
     } else {
-        line += fmt::format(fg(green), "[ {} bytes, {:.{}f}%, {} ]", size, relative_size, 2, filecount);
+        line += fmt::format(fg(green), "[ {} bytes, {:.{}f}%, {} ]", size, relative_size, 2, num_children);
     }
 }
 
@@ -75,7 +75,7 @@ nlohmann::json build_json_from_tree(const std::unique_ptr<filenode::FileNode> &n
         j["usage"] = utils::compute_relative_usage(node->get_filesize(), total_size);
     } else if (node->is_directory()) {
         j["dirname"] = node->filename;
-        j["filecount"] = node->get_filecount();
+        j["num_children"] = node->get_num_children();
         j["filesize"] = node->get_filesize();
         j["usage"] = utils::compute_relative_usage(node->get_filesize(), total_size);
     } else {
@@ -126,7 +126,7 @@ void print_pretty_output(const std::unique_ptr<filenode::FileNode> &node, uintma
         append_usage(line, node->get_filesize(), total_size);
     } else if (node->is_directory()) {
         append_directory(line, node->filename);
-        append_usage(line, node->get_filesize(), total_size, node->get_filecount());
+        append_usage(line, node->get_filesize(), total_size, node->get_num_children());
     } else {
         append_other(line, node->filename);
     }
@@ -165,7 +165,7 @@ void print_pretty_output_dirs_only(const std::unique_ptr<filenode::FileNode> &no
         }
 
         append_directory(line, node->filename);
-        append_usage(line, node->get_filesize(), total_size, node->get_filecount());
+        append_usage(line, node->get_filesize(), total_size, node->get_num_children());
         fmt::print("{}\n", line);
     } else {
         next_prefix = "";

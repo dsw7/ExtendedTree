@@ -16,7 +16,7 @@ enum FileType {
 class FileNode {
 private:
     FileType filetype_ = REGULAR_FILE;
-    std::optional<uintmax_t> filecount_ = std::nullopt;
+    std::optional<uintmax_t> num_children_ = std::nullopt;
     std::optional<uintmax_t> filesize_ = std::nullopt;
 
 public:
@@ -27,8 +27,8 @@ public:
 
     void set_filesize(uintmax_t filesize);
     uintmax_t get_filesize();
-    void set_filecount(uintmax_t filecount);
-    uintmax_t get_filecount();
+    void set_num_children(uintmax_t num_children);
+    uintmax_t get_num_children();
     void set_is_file();
     void set_is_directory();
     void set_is_other();

@@ -17,14 +17,14 @@ uintmax_t FileNode::get_filesize()
     return this->filesize_.value_or(0);
 }
 
-void FileNode::set_filecount(uintmax_t filecount)
+void FileNode::set_num_children(uintmax_t num_children)
 {
-    this->filecount_ = filecount;
+    this->num_children_ = num_children;
 }
 
-uintmax_t FileNode::get_filecount()
+uintmax_t FileNode::get_num_children()
 {
-    return this->filecount_.value_or(0);
+    return this->num_children_.value_or(0);
 }
 
 void FileNode::set_is_file()

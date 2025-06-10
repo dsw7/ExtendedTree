@@ -122,7 +122,7 @@ class TestValidReporting(TestTree):
 
         json = loads(process.stdout)
         self.assertEqual(json["dirname"], "/tmp/etree_test")
-        self.assertEqual(json["filecount"], 9)
+        self.assertEqual(json["num_children"], 9)
         self.assertEqual(json["filesize"], 27)
         self.assertEqual(json["usage"], 100)
 
@@ -130,7 +130,7 @@ class TestValidReporting(TestTree):
 
         child = json["children"][0]
         self.assertIn(child["dirname"], {"foo", "bar", "baz"})
-        self.assertEqual(child["filecount"], 3)
+        self.assertEqual(child["num_children"], 3)
         self.assertEqual(child["filesize"], 9)
         self.assertAlmostEqual(child["usage"], 33.3333, places=4)
 
@@ -138,7 +138,7 @@ class TestValidReporting(TestTree):
 
         subchild = child["children"][0]
         self.assertIn(subchild["filename"], {"a.txt", "b.txt", "c.txt"})
-        self.assertNotIn("filecount", subchild)
+        self.assertNotIn("num_children", subchild)
         self.assertEqual(subchild["filesize"], 3)
         self.assertAlmostEqual(subchild["usage"], 11.1111, places=4)
 
@@ -148,7 +148,7 @@ class TestValidReporting(TestTree):
 
         json = loads(process.stdout)
         self.assertEqual(json["dirname"], "/tmp/etree_test")
-        self.assertEqual(json["filecount"], 9)
+        self.assertEqual(json["num_children"], 9)
         self.assertEqual(json["filesize"], 27)
         self.assertEqual(json["usage"], 100)
 
@@ -156,7 +156,7 @@ class TestValidReporting(TestTree):
 
         child = json["children"][0]
         self.assertEqual(child["dirname"], "baz")
-        self.assertEqual(child["filecount"], 3)
+        self.assertEqual(child["num_children"], 3)
         self.assertEqual(child["filesize"], 9)
         self.assertAlmostEqual(child["usage"], 33.3333, places=4)
 
@@ -164,7 +164,7 @@ class TestValidReporting(TestTree):
 
         subchild = child["children"][0]
         self.assertIn(subchild["filename"], {"a.txt", "b.txt", "c.txt"})
-        self.assertNotIn("filecount", subchild)
+        self.assertNotIn("num_children", subchild)
         self.assertEqual(subchild["filesize"], 3)
         self.assertAlmostEqual(subchild["usage"], 11.1111, places=4)
 
@@ -174,7 +174,7 @@ class TestValidReporting(TestTree):
 
         json = loads(process.stdout)
         self.assertEqual(json["dirname"], "/tmp/etree_test")
-        self.assertEqual(json["filecount"], 9)
+        self.assertEqual(json["num_children"], 9)
         self.assertEqual(json["filesize"], 27)
         self.assertEqual(json["usage"], 100)
 
@@ -182,7 +182,7 @@ class TestValidReporting(TestTree):
 
         child = json["children"][0]
         self.assertIn(child["dirname"], {"foo", "bar", "baz"})
-        self.assertEqual(child["filecount"], 3)
+        self.assertEqual(child["num_children"], 3)
         self.assertEqual(child["filesize"], 9)
         self.assertAlmostEqual(child["usage"], 33.3333, places=4)
 
