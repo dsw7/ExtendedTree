@@ -1,5 +1,6 @@
 # ExtendedTree
-A lightweight `tree` equivalent
+A lightweight `tree` equivalent. This program returns information similar to the `ncdu` command (see
+[ncdu(1)](https://linux.die.net/man/1/ncdu) for more information) but in tree-like format.
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dsw7/ExtendedTree/master/LICENSE)
 
@@ -30,18 +31,22 @@ etree bar
 ```
 Will return:
 ```console
-└── bar/ [ 27 bytes, 100.00% ]
-    ├── baz/ [ 9 bytes, 33.33% ]
-    │   ├── a.txt [ 3 bytes, 11.11% ]
-    │   ├── b.txt [ 3 bytes, 11.11% ]
-    │   └── c.txt [ 3 bytes, 11.11% ]
-    ├── foo/ [ 9 bytes, 33.33% ]
-    │   ├── a.txt [ 3 bytes, 11.11% ]
-    │   ├── b.txt [ 3 bytes, 11.11% ]
-    │   └── c.txt [ 3 bytes, 11.11% ]
-    └── bar/ [ 9 bytes, 33.33% ]
-        ├── a.txt [ 3 bytes, 11.11% ]
-        ├── b.txt [ 3 bytes, 11.11% ]
-        └── c.txt [ 3 bytes, 11.11% ]
+└── bar/ [ 52.00 KiB, 100.00%, 9 ]
+    ├── baz/ [ 16.00 KiB, 30.77%, 3 ]
+    │   ├── a.txt [ 4.00 KiB, 7.69% ]
+    │   ├── b.txt [ 4.00 KiB, 7.69% ]
+    │   └── c.txt [ 4.00 KiB, 7.69% ]
+    ├── foo/ [ 16.00 KiB, 30.77%, 3 ]
+    │   ├── a.txt [ 4.00 KiB, 7.69% ]
+    │   ├── b.txt [ 4.00 KiB, 7.69% ]
+    │   └── c.txt [ 4.00 KiB, 7.69% ]
+    └── bar/ [ 16.00 KiB, 30.77%, 3 ]
+        ├── a.txt [ 4.00 KiB, 7.69% ]
+        ├── b.txt [ 4.00 KiB, 7.69% ]
+        └── c.txt [ 4.00 KiB, 7.69% ]
+
+Total size: 52.00 KiB
+Number of directories: 3
+Number of files: 9
+Number of other file-like objects: 0
 ```
-Note that this calculation is based on the file size itself and not on block size.
