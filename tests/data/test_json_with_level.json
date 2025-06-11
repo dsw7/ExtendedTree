@@ -1,0 +1,29 @@
+{
+    "children": [
+        {
+            "children": [],
+            "dirname": "baz",
+            "disk_usage": 16384,
+            "num_children": 3,
+            "relative_usage": "30.77%"
+        },
+        {
+            "children": [],
+            "dirname": "foo",
+            "disk_usage": 16384,
+            "num_children": 3,
+            "relative_usage": "30.77%"
+        },
+        {
+            "children": [],
+            "dirname": "bar",
+            "disk_usage": 16384,
+            "num_children": 3,
+            "relative_usage": "30.77%"
+        }
+    ],
+    "dirname": "etree_test",
+    "disk_usage": 53248,
+    "num_children": 9,
+    "relative_usage": "100.00%"
+}

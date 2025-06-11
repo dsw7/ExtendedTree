@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from json import loads
+from pathlib import Path
 from subprocess import run, PIPE
 from .base import TestTree, get_path_to_etree_binary
 
@@ -114,78 +115,31 @@ class TestCommandLine(TestTree):
         self.assertNotRegex(process.stdout, r"(foo|bar|baz)")
 
 
-class TestValidReporting(TestTree):
+class TestJsonOutput(TestTree):
 
     def test_json(self) -> None:
         process = run_subprocess([self.test_dir, "-j -1"])
         self.assertEqual(process.exit_code, 0)
 
         json = loads(process.stdout)
-        self.assertEqual(json["dirname"], "etree_test")
-        self.assertEqual(json["num_children"], 9)
-        self.assertEqual(
-            json["disk_usage"], 13 * self.block_size
-        )  # 13 children (including dirs)
-        self.assertEqual(json["relative_usage"], 100)
-
-        self.assertEqual(len(json["children"]), 3)
-
-        child = json["children"][0]
-        self.assertIn(child["dirname"], {"foo", "bar", "baz"})
-        self.assertEqual(child["num_children"], 3)
-        self.assertEqual(child["disk_usage"], 4 * self.block_size)
-        self.assertAlmostEqual(child["relative_usage"], 30.7692, places=4)
-
-        self.assertEqual(len(child["children"]), 3)
-
-        subchild = child["children"][0]
-        self.assertIn(subchild["filename"], {"a.txt", "b.txt", "c.txt"})
-        self.assertNotIn("num_children", subchild)
-        self.assertEqual(subchild["disk_usage"], self.block_size)
-        self.assertAlmostEqual(subchild["relative_usage"], 7.6923, places=4)
+        test_file = Path(__file__).parent / "data" / "test_json.json"
+        json_expected = loads(test_file.read_text())
+        self.assertDictEqual(json, json_expected)
 
     def test_json_with_excludes(self) -> None:
         process = run_subprocess([self.test_dir, "-j -1", "-Ifoo", "-Ibar"])
         self.assertEqual(process.exit_code, 0)
 
         json = loads(process.stdout)
-        self.assertEqual(json["dirname"], "etree_test")
-        self.assertEqual(json["num_children"], 9)
-        self.assertEqual(json["disk_usage"], 13 * self.block_size)
-        self.assertEqual(json["relative_usage"], 100)
-
-        self.assertEqual(len(json["children"]), 1)
-
-        child = json["children"][0]
-        self.assertEqual(child["dirname"], "baz")
-        self.assertEqual(child["num_children"], 3)
-        self.assertEqual(child["disk_usage"], 4 * self.block_size)
-        self.assertAlmostEqual(child["relative_usage"], 30.7692, places=4)
-
-        self.assertEqual(len(child["children"]), 3)
-
-        subchild = child["children"][0]
-        self.assertIn(subchild["filename"], {"a.txt", "b.txt", "c.txt"})
-        self.assertNotIn("num_children", subchild)
-        self.assertEqual(subchild["disk_usage"], self.block_size)
-        self.assertAlmostEqual(subchild["relative_usage"], 7.6923, places=4)
+        test_file = Path(__file__).parent / "data" / "test_json_with_excludes.json"
+        json_expected = loads(test_file.read_text())
+        self.assertDictEqual(json, json_expected)
 
     def test_json_with_level(self) -> None:
         process = run_subprocess([self.test_dir, "-j -1", "-L1"])
         self.assertEqual(process.exit_code, 0)
 
         json = loads(process.stdout)
-        self.assertEqual(json["dirname"], "etree_test")
-        self.assertEqual(json["num_children"], 9)
-        self.assertEqual(json["disk_usage"], 13 * self.block_size)
-        self.assertEqual(json["relative_usage"], 100)
-
-        self.assertEqual(len(json["children"]), 3)
-
-        child = json["children"][0]
-        self.assertIn(child["dirname"], {"foo", "bar", "baz"})
-        self.assertEqual(child["num_children"], 3)
-        self.assertEqual(child["disk_usage"], 4 * self.block_size)
-        self.assertAlmostEqual(child["relative_usage"], 30.7692, places=4)
-
-        self.assertEqual(len(child["children"]), 0)
+        test_file = Path(__file__).parent / "data" / "test_json_with_level.json"
+        json_expected = loads(test_file.read_text())
+        self.assertDictEqual(json, json_expected)

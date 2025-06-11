@@ -1,0 +1,86 @@
+{
+    "children": [
+        {
+            "children": [
+                {
+                    "children": [],
+                    "disk_usage": 4096,
+                    "filename": "a.txt",
+                    "relative_usage": "7.69%"
+                },
+                {
+                    "children": [],
+                    "disk_usage": 4096,
+                    "filename": "b.txt",
+                    "relative_usage": "7.69%"
+                },
+                {
+                    "children": [],
+                    "disk_usage": 4096,
+                    "filename": "c.txt",
+                    "relative_usage": "7.69%"
+                }
+            ],
+            "dirname": "baz",
+            "disk_usage": 16384,
+            "num_children": 3,
+            "relative_usage": "30.77%"
+        },
+        {
+            "children": [
+                {
+                    "children": [],
+                    "disk_usage": 4096,
+                    "filename": "a.txt",
+                    "relative_usage": "7.69%"
+                },
+                {
+                    "children": [],
+                    "disk_usage": 4096,
+                    "filename": "b.txt",
+                    "relative_usage": "7.69%"
+                },
+                {
+                    "children": [],
+                    "disk_usage": 4096,
+                    "filename": "c.txt",
+                    "relative_usage": "7.69%"
+                }
+            ],
+            "dirname": "foo",
+            "disk_usage": 16384,
+            "num_children": 3,
+            "relative_usage": "30.77%"
+        },
+        {
+            "children": [
+                {
+                    "children": [],
+                    "disk_usage": 4096,
+                    "filename": "a.txt",
+                    "relative_usage": "7.69%"
+                },
+                {
+                    "children": [],
+                    "disk_usage": 4096,
+                    "filename": "b.txt",
+                    "relative_usage": "7.69%"
+                },
+                {
+                    "children": [],
+                    "disk_usage": 4096,
+                    "filename": "c.txt",
+                    "relative_usage": "7.69%"
+                }
+            ],
+            "dirname": "bar",
+            "disk_usage": 16384,
+            "num_children": 3,
+            "relative_usage": "30.77%"
+        }
+    ],
+    "dirname": "etree_test",
+    "disk_usage": 53248,
+    "num_children": 9,
+    "relative_usage": "100.00%"
+}
