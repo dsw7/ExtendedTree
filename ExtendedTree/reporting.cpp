@@ -44,23 +44,23 @@ void append_other(std::string &line, const std::string &filename)
 
 void append_usage(std::string &line, uintmax_t size, uintmax_t total_size)
 {
-    float relative_size = utils::compute_relative_usage(size, total_size);
+    const std::string relative_size = utils::compute_relative_usage(size, total_size);
 
     if (params::PRINT_BYTES) {
-        line += fmt::format(fg(green), "[ {} B, {:.{}f}% ]", size, relative_size, 2);
+        line += fmt::format(fg(green), "[ {} B, {} ]", size, relative_size);
     } else {
-        line += fmt::format(fg(green), "[ {}, {:.{}f}% ]", utils::bytes_to_human(size), relative_size, 2);
+        line += fmt::format(fg(green), "[ {}, {} ]", utils::bytes_to_human(size), relative_size);
     }
 }
 
 void append_usage(std::string &line, uintmax_t size, uintmax_t total_size, uintmax_t num_children)
 {
-    float relative_size = utils::compute_relative_usage(size, total_size);
+    const std::string relative_size = utils::compute_relative_usage(size, total_size);
 
     if (params::PRINT_BYTES) {
-        line += fmt::format(fg(green), "[ {} B, {:.{}f}%, {} ]", size, relative_size, 2, num_children);
+        line += fmt::format(fg(green), "[ {} B, {}, {} ]", size, relative_size, num_children);
     } else {
-        line += fmt::format(fg(green), "[ {}, {:.{}f}%, {} ]", utils::bytes_to_human(size), relative_size, 2, num_children);
+        line += fmt::format(fg(green), "[ {}, {}, {} ]", utils::bytes_to_human(size), relative_size, num_children);
     }
 }
 
@@ -72,12 +72,12 @@ nlohmann::json build_json_from_tree(const std::unique_ptr<filenode::FileNode> &n
     if (node->is_file()) {
         j["filename"] = node->filename;
         j["disk_usage"] = node->get_disk_usage();
-        j["relative_usage"] = fmt::format("{:.{}f}%", utils::compute_relative_usage(node->get_disk_usage(), total_size), 2);
+        j["relative_usage"] = utils::compute_relative_usage(node->get_disk_usage(), total_size);
     } else if (node->is_directory()) {
         j["dirname"] = node->filename;
         j["num_children"] = node->get_num_children();
         j["disk_usage"] = node->get_disk_usage();
-        j["relative_usage"] = fmt::format("{:.{}f}%", utils::compute_relative_usage(node->get_disk_usage(), total_size), 2);
+        j["relative_usage"] = utils::compute_relative_usage(node->get_disk_usage(), total_size);
     } else {
         j["filename"] = node->filename;
         j["disk_usage"] = nullptr;

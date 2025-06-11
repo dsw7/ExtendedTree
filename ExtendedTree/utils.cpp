@@ -1,6 +1,7 @@
 #include "utils.hpp"
 
 #include <cmath>
+#include <fmt/core.h>
 #include <iomanip>
 #include <stdexcept>
 #include <sys/stat.h>
@@ -18,13 +19,14 @@ void strip_extra_path_delimiter(std::string &path)
     }
 }
 
-float compute_relative_usage(uintmax_t size, uintmax_t total_size)
+std::string compute_relative_usage(uintmax_t size, uintmax_t total_size)
 {
     if (total_size == 0) {
-        return 0;
+        return "0.00%";
     }
 
-    return ((float)size / total_size) * 100;
+    static int decimal_places = 2;
+    return fmt::format("{:.{}f}%", ((float)size / total_size) * 100, decimal_places);
 }
 
 uintmax_t get_disk_usage(const std::string &path)
