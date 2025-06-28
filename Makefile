@@ -20,17 +20,17 @@ help:
 	@echo "$$HELP_LIST_TARGETS"
 
 format:
-	@clang-format -i --verbose --style=file ExtendedTree/*.cpp ExtendedTree/*.hpp
+	@clang-format -i --verbose --style=file src/*.cpp src/*.hpp
 
 compile: format
-	@cmake -S ExtendedTree -B build
+	@cmake -S src -B build
 	@make --jobs=12 --directory=build install
 
 clean:
 	@rm -rfv build
 
 lint:
-	@cppcheck ExtendedTree --enable=all
+	@cppcheck src --enable=all
 
 test: export PATH_BIN = $(CURDIR)/build/etree
 test: compile

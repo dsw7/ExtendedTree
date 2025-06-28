@@ -44,22 +44,17 @@ endif()
 
 # -----------------------------------------------------------------------------------------------------------
 
-include_directories(
-  "external"
-)
+include_directories(external)
 add_executable(
-  "etree"
-  "filenode.cpp"
-  "main.cpp"
-  "params.cpp"
-  "reporting.cpp"
-  "tree.cpp"
-  "utils.cpp"
+  etree
+  filenode.cpp
+  main.cpp
+  params.cpp
+  reporting.cpp
+  tree.cpp
+  utils.cpp
 )
-target_link_libraries(
-  "etree"
-  "fmt::fmt"
-)
+target_link_libraries(etree fmt::fmt)
 
 set(CMAKE_INSTALL_PREFIX "$ENV{HOME}/.local")
-install(TARGETS "etree" DESTINATION "bin")
+install(TARGETS etree DESTINATION bin)
