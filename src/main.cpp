@@ -15,14 +15,25 @@ namespace fs = std::filesystem;
 
 void print_help_messages()
 {
-    fmt::print("Usage:\n  etree [OPTION]... DIRECTORY\n\n");
-    fmt::print("Options:\n");
-    fmt::print("  -b         {}\n", "Print sizes in bytes");
-    fmt::print("  -d         {}\n", "Print directories only");
-    fmt::print("  -j <level> {}\n", "Print output as JSON with indentation <level>");
-    fmt::print("  -I         {}\n", "Exclude one or more files or directories");
-    fmt::print("  -L <level> {}\n", "Descend <level> directories deep");
-    fmt::print("  -h         {}\n", "Print this help message and exit");
+    const std::string messages = R"(-- ExtendedTree | Copyright (C) 2025 by David Weber
+
+A program for recursively calculating relative disk usage. Program
+returns information similar to "ncdu" but in like tree-like format.
+
+Usage:
+  etree [OPTION]
+  etree [OPTION]... DIRECTORY
+
+Options:
+  -b         Print sizes in bytes
+  -d         Print directories only
+  -j <level> Print output as JSON with indentation <level>
+  -I         Exclude one or more files or directories
+  -L <level> Descend <level> directories deep
+  -h         Print this help message and exit
+)";
+
+    fmt::print("{}", messages);
 }
 
 std::string validate_target(const std::optional<fs::path> &target_from_opts)
