@@ -21,16 +21,15 @@ A program for recursively calculating relative disk usage. Program
 returns information similar to "ncdu" but in like tree-like format.
 
 Usage:
-  etree [OPTION]
-  etree [OPTION]... DIRECTORY
+  etree [OPTIONS] [DIRECTORY]
 
 Options:
-  -b         Print sizes in bytes
-  -d         Print directories only
-  -j <level> Print output as JSON with indentation <level>
-  -I         Exclude one or more files or directories
-  -L <level> Descend <level> directories deep
-  -h         Print this help message and exit
+  -b        Print sizes in bytes
+  -d        Print directories only
+  -j LEVEL  Print output as JSON with indentation LEVEL
+  -I        Exclude one or more files or directories
+  -L LEVEL  Descend LEVEL directories deep
+  -h        Print this help message and exit
 )";
 
     fmt::print("{}", messages);
